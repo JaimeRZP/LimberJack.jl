@@ -60,15 +60,21 @@ end
 d = 13
 eps = 0.07
 L = round(sqrt(d), digits=2)
-sigma = ones(d)
+sigma = [0.00836992, 0.0024753 , 0.0244054 , 0.03815257, 0.02393229,
+       0.05916945, 0.07078313, 0.06694585, 0.08765118, 0.00433279,
+       0.00390493, 0.00271033, 0.00561002]
 
 stats_model = model(data)
 target = TuringTarget(stats_model)
 spl = MCHMC(eps, L; sigma=sigma)
+nchains = nthreads()
 
 # Start sampling.
 folpath = "../../chains/MCHMC"
-folname = string("DECALS_eps_", eps, "_L_", L)
+folname = string("DECALS_eps_", eps, "_L_", L, "_t_", nchains)
+if sigma != ones(d)
+    folname = string(folname, "_preconditioned")
+end    
 folname = joinpath(folpath, folname)
 
 if isdir(folname)
@@ -77,8 +83,6 @@ else
     mkdir(folname)
     println(string("Created new folder ", folname))
 end
-
-nchains = nthreads()
 
 @threads :static for i in 1:nchains    
     file_name = string("chain_", i)
