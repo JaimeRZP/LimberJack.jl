@@ -88,7 +88,7 @@ data = meta.data
     data ~ MvNormal(theory, cov)
 end;
 
-d = 26
+d = 27
 eps = 0.05
 L = round(sqrt(d), digits=2)
 sigma = ones(d)

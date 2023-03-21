@@ -122,4 +122,4 @@ nchains = nthreads()
     file_name = string("chain_", i)
     samples= Sample(spl, target, 10_000;
                     burn_in=200, fol_name=folname, file_name=file_name, dialog=true)
-end      
+end   
