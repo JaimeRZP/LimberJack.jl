@@ -124,10 +124,10 @@ data = meta.data
                      "alpha_IA" => alpha_IA)
 
     
-    cosmology = LimberJack.Cosmology(Ωm, Ωb, h, ns, s8,
-                                     tk_mode="emulator",
-                                     Pk_mode="Halofit",
-                                     emul_path="../../emulator/files.npz")
+    cosmology = Cosmology(Ωm, Ωb, h, ns, s8,
+                          tk_mode="emulator",
+                          Pk_mode="Halofit",
+                          emul_path="../../emulator/files.npz")
     
     theory = Theory_st(cosmology, meta, files; Nuisances=nuisances)
     data ~ MvNormal(theory, cov)
@@ -137,6 +137,7 @@ d = 45
 eps = 0.05
 L = round(sqrt(d), digits=2)
 sigma = ones(d)
+nchains = nthreads()
 
 stats_model = model(data)
 target = TuringTarget(stats_model)
@@ -144,7 +145,7 @@ spl = MCHMC(eps, L; sigma=sigma)
 
 # Start sampling.
 folpath = "../../chains/MCHMC"
-folname = string("FD_eps_", eps, "_L_", L)
+folname = string("FD_eps_", eps, "_L_", L, "_t_", nchains)
 folname = joinpath(folpath, folname)
 
 if isdir(folname)
@@ -163,12 +164,8 @@ else
     last_n = 0
 end
 
-nchains = nthreads()
-
 @threads :static for i in 1:nchains    
     file_name = string("chain_", i)
     samples= Sample(spl, target, 10_000;
                     burn_in=200, fol_name=folname, file_name=file_name, dialog=true)
 end      
-
-

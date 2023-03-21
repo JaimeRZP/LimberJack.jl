@@ -92,6 +92,7 @@ d = 27
 eps = 0.05
 L = round(sqrt(d), digits=2)
 sigma = ones(d)
+nchains = nthreads()
 
 stats_model = model(data)
 target = TuringTarget(stats_model)
@@ -99,7 +100,7 @@ spl = MCHMC(eps, L; sigma=sigma)
 
 # Start sampling.
 folpath = "../../chains/MCHMC"
-folname = string("SD_eps_", eps, "_L_", L)
+folname = string("SD_eps_", eps, "_L_", L, "_t_", nchains)
 folname = joinpath(folpath, folname)
 
 if isdir(folname)
@@ -117,8 +118,6 @@ else
     println(string("Created new folder ", folname))
     last_n = 0
 end
-
-nchains = nthreads()
 
 @threads :static for i in 1:nchains    
     file_name = string("chain_", i)
