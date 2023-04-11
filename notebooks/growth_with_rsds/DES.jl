@@ -1,4 +1,3 @@
-using Distribu
 using Pkg
 Pkg.activate("../../../MicroCanonicalHMC.jl/")
 using Distributed
@@ -6,7 +5,6 @@ using Distributed
 @everywhere begin
     using LinearAlgebra
     using Turing
-    using AdvancedHMC
     using LimberJack
     using CSV
     using YAML
