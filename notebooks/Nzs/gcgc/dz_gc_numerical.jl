@@ -12,9 +12,9 @@ using Distributed
 
     println("My id is ", myid(), " and I have ", Threads.nthreads(), " threads")
 
-    sacc_path = "../../data/FD/cls_FD_covG.fits"
-    yaml_path = "../../data/DESY1/wlwl.yml"
-    nz_path = "../../data/DESY1/binned_40_nzs/"
+    sacc_path = "../../../data/FD/cls_FD_covG.fits"
+    yaml_path = "../../../data/DESY1/wlwl.yml"
+    nz_path = "../../../data/DESY1/binned_40_nzs/"
     sacc_file = sacc.Sacc().load_fits(sacc_path)
     yaml_file = YAML.load_file(yaml_path)
     nz_DESgc__0 = npzread(string(nz_path, "nz_DESgc__0.npz"))
