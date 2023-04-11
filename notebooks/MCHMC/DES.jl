@@ -16,22 +16,18 @@ using MicroCanonicalHMC
 
 sacc_path = "../../data/FD/cls_FD_covG.fits"
 yaml_path = "../../data/DESY1/gcgc_gcwl_wlwl.yml"
-nz_path = "../../data/DESY1/binned_40_nzs/"
+nz_path = "../../data/DESY1/nzs"
 sacc_file = sacc.Sacc().load_fits(sacc_path)
 yaml_file = YAML.load_file(yaml_path)
-nz_DESwl__0 = npzread(string(nz_path, "nz_DESwl__0.npz"))
-nz_DESwl__1 = npzread(string(nz_path, "nz_DESwl__1.npz"))
-nz_DESwl__2 = npzread(string(nz_path, "nz_DESwl__2.npz"))
-nz_DESwl__3 = npzread(string(nz_path, "nz_DESwl__3.npz"))
-zs_k0, nz_k0, cov_k0 = nz_DESwl__0["z"], nz_DESwl__0["dndz"], nz_DESwl__0["cov"]
-zs_k1, nz_k1, cov_k1 = nz_DESwl__1["z"], nz_DESwl__1["dndz"], nz_DESwl__1["cov"]
-zs_k2, nz_k2, cov_k2 = nz_DESwl__2["z"], nz_DESwl__2["dndz"], nz_DESwl__2["cov"]
-zs_k3, nz_k3, cov_k3 = nz_DESwl__3["z"], nz_DESwl__3["dndz"], nz_DESwl__3["cov"]
-meta, files = make_data(sacc_file, yaml_file;
-                        nz_DESwl__0=nz_DESwl__0,
-                        nz_DESwl__1=nz_DESwl__1,
-                        nz_DESwl__2=nz_DESwl__2,
-                        nz_DESwl__3=nz_DESwl__3)
+# nz_DESwl__0 = npzread(string(nz_path, "nz_DESwl__0.npz"))
+# nz_DESwl__1 = npzread(string(nz_path, "nz_DESwl__1.npz"))
+# nz_DESwl__2 = npzread(string(nz_path, "nz_DESwl__2.npz"))
+# nz_DESwl__3 = npzread(string(nz_path, "nz_DESwl__3.npz"))
+meta, files = make_data(sacc_file, yaml_file)
+                        #nz_DESwl__0=nz_DESwl__0,
+                        #nz_DESwl__1=nz_DESwl__1,
+                        #nz_DESwl__2=nz_DESwl__2,
+                        #nz_DESwl__3=nz_DESwl__3)
 
 cov = meta.cov
 data = meta.data

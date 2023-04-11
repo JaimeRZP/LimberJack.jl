@@ -14,37 +14,30 @@ using Distributed
 
     sacc_path = "../../data/FD/cls_FD_covG.fits"
     yaml_path = "../../data/DESY1/gcgc_gcwl_wlwl.yml"
+    nz_path = "../../data/DESY1/nzs"
     sacc_file = sacc.Sacc().load_fits(sacc_path)
     yaml_file = YAML.load_file(yaml_path)
-    nz_DESwl__0 = npzread(string(nz_path, "nz_DESwl__0.npz"))
-    nz_DESwl__1 = npzread(string(nz_path, "nz_DESwl__1.npz"))
-    nz_DESwl__2 = npzread(string(nz_path, "nz_DESwl__2.npz"))
-    nz_DESwl__3 = npzread(string(nz_path, "nz_DESwl__3.npz"))
-    zs_k0, nz_k0, cov_k0 = nz_DESwl__0["z"], nz_DESwl__0["dndz"], nz_DESwl__0["cov"]
-    zs_k1, nz_k1, cov_k1 = nz_DESwl__1["z"], nz_DESwl__1["dndz"], nz_DESwl__1["cov"]
-    zs_k2, nz_k2, cov_k2 = nz_DESwl__2["z"], nz_DESwl__2["dndz"], nz_DESwl__2["cov"]
-    zs_k3, nz_k3, cov_k3 = nz_DESwl__3["z"], nz_DESwl__3["dndz"], nz_DESwl__3["cov"]
-    meta, files = make_data(sacc_file, yaml_file;
-                            nz_DESwl__0=nz_DESwl__0,
-                            nz_DESwl__1=nz_DESwl__1,
-                            nz_DESwl__2=nz_DESwl__2,
-                            nz_DESwl__3=nz_DESwl__3)
+    #nz_DESwl__0 = npzread(string(nz_path, "nz_DESwl__0.npz"))
+    #nz_DESwl__1 = npzread(string(nz_path, "nz_DESwl__1.npz"))
+    #nz_DESwl__2 = npzread(string(nz_path, "nz_DESwl__2.npz"))
+    #nz_DESwl__3 = npzread(string(nz_path, "nz_DESwl__3.npz"))
+    meta, files = make_data(sacc_file, yaml_file)
+                            #nz_DESwl__0=nz_DESwl__0,
+                            #nz_DESwl__1=nz_DESwl__1,
+                            #nz_DESwl__2=nz_DESwl__2,
+                            #nz_DESwl__3=nz_DESwl__3)
 
-    data_vector = meta.data
-    cov_tot = meta.cov
-    errs = sqrt.(diag(cov_tot))
-    fake_data = data_vector ./ errs
-    fake_cov = Hermitian(cov_tot ./ (errs * errs'));
+    data = meta.data
+    cov = meta.cov
 end 
 
 @everywhere @model function model(data;
-                                  cov=fake_cov,
                                   meta=meta, 
                                   files=files)
     #KiDS priors
     Ωm ~ Uniform(0.2, 0.6)
     Ωb ~ Uniform(0.028, 0.065)
-    h ~ TruncatedNormal(72, 5, 0.64, 0.82)
+    h ~ Truncated(Normal(0.72, 0.05), 0.64, 0.82)
     s8 ~ Uniform(0.4, 1.2)
     ns ~ Uniform(0.84, 1.1)
 
@@ -95,39 +88,19 @@ end
                           Pk_mode="Halofit")
 
     theory = Theory(cosmology, meta, files; Nuisances=nuisances)
-    data ~ MvNormal(theory ./ errs, cov)
+    data ~ MvNormal(theory, cov)
 end
 
-stats_model = model(fake_data)
-MAP_vals = [ 2.89781002e-01,  4.77686400e-02,  7.38011259e-01,  7.98425957e-01,
-        9.69728709e-01,  1.49721568e+00,  1.81865817e+00,  1.79001308e+00,
-        2.18263403e+00,  2.24598151e+00, -3.46696435e-03, -3.77762873e-03,
-       -1.60856663e-03, -2.09706269e-03,  5.92820210e-04, -1.05679892e-02,
-        5.08483360e-03,  4.75152724e-03, -8.16263963e-04,  1.90524810e-02,
-        3.83250992e-03,  2.35920245e-02, -1.54272168e-03,  3.16431800e-01,
-       -2.64120253e-01]
-MAP_names = ["Ωm", "Ωb", "h", "s8",  "ns",
-              "DESgc__0_b", "DESgc__1_b","DESgc__2_b","DESgc__3_b","DESgc__4_b",
-              "DESgc__0_dz", "DESgc__1_dz", "DESgc__2_dz", "DESgc__3_dz", "DESgc__4_dz",
-              "DESwl__0_dz", "DESwl__1_dz", "DESwl__2_dz", "DESwl__3_dz",
-              "DESwl__0_m", "DESwl__1_m", "DESwl__2_m", "DESwl__3_m",
-              "A_IA", "alpha_IA",];
-loglike = Loglike(stats_model, MAP_names)
-mass_matrix = get_mass_matrix(loglike, MAP_vals)
-metric = DenseEuclideanMetric(mass_matrix)
-sampler = Sampler(NUTS(adaptation, TAP; metric=metric),
-                  stats_model)
-
 cycles = 6
-iterations = 1000
+iterations = 500
 nchains = nprocs()
 
-adaptation = 1000
+adaptation = 500
 TAP = 0.65
 init_ϵ = 0.01
 
-sampler = Turing.NUTS(adaptation, TAP;
-                      init_ϵ = init_ϵ)
+cond_model = model(data)
+sampler = NUTS(adaptation, TAP)
 
 println("sampling settings: ")
 println("cycles ", cycles)
@@ -137,8 +110,8 @@ println("adaptation ", adaptation)
 println("nchains ", nchains)
 
 # Start sampling.
-folpath = "../../chains"
-folname = string("DESY1_EisHu_custom_nz")
+folpath = "../../chains/NUTS/standard_runs/"
+folname = string("DESY1_EisHu")
 folname = joinpath(folpath, folname)
 
 if isdir(folname)
@@ -160,11 +133,11 @@ end
 
 for i in (1+last_n):(cycles+last_n)
     if i == 1
-        chain = sample(stats_model, sampler, MCMCDistributed(),
+        chain = sample(cond_model, sampler, MCMCDistributed(),
                        iterations, nchains, progress=true; save_state=true)
     else
         old_chain = read(joinpath(folname, string("chain_", i-1,".jls")), Chains)
-        chain = sample(stats_model, sampler, MCMCDistributed(),
+        chain = sample(cond_model, sampler, MCMCDistributed(),
                        iterations, nchains, progress=true; save_state=true, resume_from=old_chain)
     end  
     write(joinpath(folname, string("chain_", i,".jls")), chain)
