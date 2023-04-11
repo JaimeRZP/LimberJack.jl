@@ -94,7 +94,7 @@ println("adaptation ", adaptation)
 println("nchains ", nchains)
 
 # Start sampling.
-folpath = "../../chains/Nzs_chains/gcgc_runs/"
+folpath = "../../../chains/Nzs_chains/gcgc_runs/"
 folname = string("dz_gc_numerical_", "TAP_", TAP)
 folname = joinpath(folpath, folname)
 
