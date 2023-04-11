@@ -1,8 +1,14 @@
-using Distributed
+using Pkg
+Pkg.activate("../../../MicroCanonicalHMC.jl/")
 
+using Distributed
 @everywhere begin
+    using Pkg
+    Pkg.activate("../../../MicroCanonicalHMC.jl/")
+    
     using LinearAlgebra
     using Turing
+    using AdvancedHMC
     using LimberJack
     using CSV
     using YAML
@@ -13,25 +19,30 @@ using Distributed
 
     sacc_path = "../../data/FD/cls_FD_covG.fits"
     yaml_path = "../../data/DESY1/gcgc_gcwl_wlwl.yml"
+    nz_path = "../../data/DESY1/nzs"
     sacc_file = sacc.Sacc().load_fits(sacc_path)
     yaml_file = YAML.load_file(yaml_path)
+    #nz_DESwl__0 = npzread(string(nz_path, "nz_DESwl__0.npz"))
+    #nz_DESwl__1 = npzread(string(nz_path, "nz_DESwl__1.npz"))
+    #nz_DESwl__2 = npzread(string(nz_path, "nz_DESwl__2.npz"))
+    #nz_DESwl__3 = npzread(string(nz_path, "nz_DESwl__3.npz"))
     meta, files = make_data(sacc_file, yaml_file)
+                            #nz_DESwl__0=nz_DESwl__0,
+                            #nz_DESwl__1=nz_DESwl__1,
+                            #nz_DESwl__2=nz_DESwl__2,
+                            #nz_DESwl__3=nz_DESwl__3)
 
-    data_vector = meta.data
-    cov_tot = meta.cov
-    errs = sqrt.(diag(cov_tot))
-    fake_data = data_vector ./ errs
-    fake_cov = Hermitian(cov_tot ./ (errs * errs'));
+    data = meta.data
+    cov = meta.cov
 end 
 
 @everywhere @model function model(data;
-                                  cov=fake_cov,
                                   meta=meta, 
                                   files=files)
     #KiDS priors
     Ωm ~ Uniform(0.2, 0.6)
     Ωb ~ Uniform(0.028, 0.065)
-    h ~ TruncatedNormal(72, 5, 0.64, 0.82)
+    h ~ Truncated(Normal(0.72, 0.05), 0.64, 0.82)
     s8 ~ Uniform(0.4, 1.2)
     ns ~ Uniform(0.84, 1.1)
 
@@ -66,10 +77,6 @@ end
                      "DESgc__2_dz" => DESgc__2_dz,
                      "DESgc__3_dz" => DESgc__3_dz,
                      "DESgc__4_dz" => DESgc__4_dz,
-
-                     "A_IA" => A_IA,
-                     "alpha_IA" => alpha_IA,
-
                      "DESwl__0_dz" => DESwl__0_dz,
                      "DESwl__1_dz" => DESwl__1_dz,
                      "DESwl__2_dz" => DESwl__2_dz,
@@ -77,7 +84,9 @@ end
                      "DESwl__0_m" => DESwl__0_m,
                      "DESwl__1_m" => DESwl__1_m,
                      "DESwl__2_m" => DESwl__2_m,
-                     "DESwl__3_m" => DESwl__3_m)
+                     "DESwl__3_m" => DESwl__3_m,
+                     "A_IA" => A_IA,
+                     "alpha_IA" => alpha_IA,)
 
     cosmology = Cosmology(Ωm, Ωb, h, ns, s8,
                          tk_mode="emulator",
@@ -85,19 +94,19 @@ end
                          emul_path="../../emulator/files.npz")
 
     theory = Theory(cosmology, meta, files; Nuisances=nuisances)
-    data ~ MvNormal(theory ./ errs, cov)
+    data ~ MvNormal(theory, cov)
 end
 
 cycles = 6
-iterations = 1000
+iterations = 500
 nchains = nprocs()
 
-adaptation = 250
+adaptation = 500
 TAP = 0.65
-init_ϵ = 0.005
+init_ϵ = 0.01
 
-stats_model = model(fake_data)
-sampler = MH()
+cond_model = model(data)
+sampler = NUTS(adaptation, TAP)
 
 println("sampling settings: ")
 println("cycles ", cycles)
@@ -107,8 +116,8 @@ println("adaptation ", adaptation)
 println("nchains ", nchains)
 
 # Start sampling.
-folpath = "../../chains"
-folname = string("DESY1_k1k_priors_emul_MH")
+folpath = "../../chains/NUTS/standard_runs/"
+folname = string("DESY1_emul")
 folname = joinpath(folpath, folname)
 
 if isdir(folname)
@@ -130,11 +139,11 @@ end
 
 for i in (1+last_n):(cycles+last_n)
     if i == 1
-        chain = sample(stats_model, sampler, MCMCDistributed(),
+        chain = sample(cond_model, sampler, MCMCDistributed(),
                        iterations, nchains, progress=true; save_state=true)
     else
         old_chain = read(joinpath(folname, string("chain_", i-1,".jls")), Chains)
-        chain = sample(stats_model, sampler, MCMCDistributed(),
+        chain = sample(cond_model, sampler, MCMCDistributed(),
                        iterations, nchains, progress=true; save_state=true, resume_from=old_chain)
     end  
     write(joinpath(folname, string("chain_", i,".jls")), chain)
