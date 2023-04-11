@@ -166,6 +166,10 @@ end
 
 @threads :static for i in 1:nchains    
     file_name = string("chain_", i)
-    samples= Sample(spl, target, 10_000;
-                    burn_in=200, fol_name=folname, file_name=file_name, dialog=true)
+    try
+        samples= Sample(spl, target, 10_000;
+                        burn_in=200, fol_name=folname, file_name=file_name, dialog=true)
+    catch
+        @warn string(filename, " failed!")
+    end    
 end      

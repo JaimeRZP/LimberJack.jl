@@ -58,7 +58,7 @@ data = meta.data
 end
 
 d = 13
-eps = 1.0
+eps = 0.8
 L = round(sqrt(d), digits=2)
 sigma = [0.00836992, 0.0024753 , 0.0244054 , 0.03815257, 0.02393229,
        0.05916945, 0.07078313, 0.06694585, 0.08765118, 0.00433279,
@@ -86,6 +86,6 @@ end
 
 @threads :static for i in 1:nchains    
     file_name = string("chain_", i)
-    samples= Sample(spl, target, 10_000;
-                    burn_in=200, fol_name=folname, file_name=file_name, dialog=true)
+    samples= Sample(spl, target, 100_000;
+                    burn_in=1000, fol_name=folname, file_name=file_name, dialog=true)
 end        
