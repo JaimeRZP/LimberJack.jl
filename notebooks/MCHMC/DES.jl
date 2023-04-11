@@ -102,7 +102,7 @@ spl = MCHMC(eps, L; sigma=sigma)
 
 # Start sampling.
 folpath = "../../chains/MCHMC"
-folname = string("DES_eps_", eps, "_L_", L, "_t_", nchains)
+folname = string("DES_no_bug_eps_", eps, "_L_", L, "_t_", nchains)
 folname = joinpath(folpath, folname)
 
 if isdir(folname)
