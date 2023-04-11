@@ -40,15 +40,15 @@ using Distributed
     s8 ~ Uniform(0.6, 0.9)
     ns ~ Uniform(0.84, 1.1)
     
-    DECALS__0_b ~ Uniform(0.8, 3.0)
-    DECALS__1_b ~ Uniform(0.8, 3.0)
-    DECALS__2_b ~ Uniform(0.8, 3.0)
-    DECALS__3_b ~ Uniform(0.8, 3.0)
+    DECALS__0_b ~ Uniform(0.8/10, 3.0/10)
+    DECALS__1_b ~ Uniform(0.8/10, 3.0/10)
+    DECALS__2_b ~ Uniform(0.8/10, 3.0/10)
+    DECALS__3_b ~ Uniform(0.8/10, 3.0/10)
 
-    nuisances = Dict("DECALS__0_b" => DECALS__0_b,
-                     "DECALS__1_b" => DECALS__1_b,
-                     "DECALS__2_b" => DECALS__2_b,
-                     "DECALS__3_b" => DECALS__3_b)
+    nuisances = Dict("DECALS__0_b" => 10*DECALS__0_b,
+                     "DECALS__1_b" => 10*DECALS__1_b,
+                     "DECALS__2_b" => 10*DECALS__2_b,
+                     "DECALS__3_b" => 10*DECALS__3_b)
 
     cosmology = LimberJack.Cosmology(Ωm, Ωb, h, ns, s8,
                                      tk_mode="emulator",
