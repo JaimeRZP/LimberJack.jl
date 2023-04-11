@@ -98,7 +98,7 @@ nchains = nthreads()
 
 stats_model = model(data)
 target = TuringTarget(stats_model)
-spl = MCHMC(eps, L; sigma=sigma)
+spl = MCHMC(1_000, 0.001; L=sqrt(d), init_eps=0.07, sigma=sigma)
 
 # Start sampling.
 folpath = "../../chains/MCHMC"
