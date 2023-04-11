@@ -1,6 +1,8 @@
 using Distributed
-
 @everywhere begin
+    using Pkg
+    Pkg.activate("../../../MicroCanonicalHMC.jl/")
+    
     using LinearAlgebra
     using Turing
     using AdvancedHMC
