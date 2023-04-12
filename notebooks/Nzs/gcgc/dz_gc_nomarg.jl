@@ -61,7 +61,7 @@ end
                      "DESgc__1_b" => DESgc__1_b,
                      "DESgc__2_b" => DESgc__2_b,
                      "DESgc__3_b" => DESgc__3_b,
-                     "DESgc__4_b" => DESgc__4_b)
+                     "DESgc__4_b" => DESgc__4_b,
                      "DESgc__0_dz" => DESgc__0_dz,
                      "DESgc__1_dz" => DESgc__1_dz,
                      "DESgc__2_dz" => DESgc__2_dz,
