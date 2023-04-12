@@ -98,7 +98,7 @@ nchains = nthreads()
 
 stats_model = model(data)
 target = TuringTarget(stats_model)
-spl = MCHMC(1_000, 0.001; L=sqrt(d), init_eps=0.07, sigma=sigma)
+spl = MCHMC(0, 0.001; L=0.1*sqrt(d), init_eps=0.01, sigma=sigma)
 
 # Start sampling.
 folpath = "../../chains/MCHMC"
@@ -124,5 +124,5 @@ end
 @threads :static for i in 1:nchains    
     file_name = string("chain_", i)
     samples= Sample(spl, target, 10_000;
-                    burn_in=200, fol_name=folname, file_name=file_name, dialog=true)
+                    fol_name=folname, file_name=file_name, dialog=true)
 end      

@@ -34,7 +34,7 @@ using Distributed
                             nz_DESgc__3=nz_DESgc__3,
                             nz_DESgc__4=nz_DESgc__4)
     data = meta.data
-    cov = npzread("../../data/DESY1/binned_40_nzs/gcgc_dz_cov_marg.npz")["cov_marg"]
+    cov = npzread("../../data/DESY1/nzs/gcgc_dz_cov_marg.npz")["cov_marg"]
 end
 
 @everywhere @model function model(data;
