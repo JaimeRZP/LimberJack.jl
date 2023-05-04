@@ -82,7 +82,8 @@ end
                     # "A_IA" => A_IA,
                     # "alpha_IA" => alpha_IA,)
 
-    cosmology = Cosmology(Ωm, Ωb, h, ns, s8,
+    cosmology = Cosmology(Ωm, Ωb, h, ns, s8;
+                          nz_t=300
                           tk_mode="EisHu",
                           Pk_mode="Halofit")
 
