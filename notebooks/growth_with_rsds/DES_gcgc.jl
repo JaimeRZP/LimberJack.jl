@@ -111,7 +111,7 @@ println("nchains ", nchains)
 
 # Start sampling.
 folpath = "../../chains/NUTS/standard_runs/"
-folname = string("DESY1_gcgc_EisHu")
+folname = string("DESY1_gcgc_EisHu_high_res")
 folname = joinpath(folpath, folname)
 
 if isdir(folname)
