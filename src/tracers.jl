@@ -31,7 +31,7 @@ NumberCountsTracer(cosmo::Cosmology, z_n, nz; kwargs...) = begin
     z_range = range(z_n[1], stop=z_n[end], length=length(z_n))
     nz_int = cubic_spline_interpolation(z_range, nz, extrapolation_bc=0)
     
-    res = cosmo.settings.nz_t
+    res = maximum([400, cosmo.settings.nz_t])
     z_w = range(0.00001, stop=z_n[end], length=res)
     nz_w = nz_int(z_w)
     nz_norm = integrate(z_w, nz_w, SimpsonEven())
