@@ -10,7 +10,7 @@ export Theory
 export make_data
 
 using Interpolations, LinearAlgebra, Statistics, QuadGK
-using NPZ, NumericalIntegration, PythonCall
+using NPZ, NumericalIntegration, Python
 
 include("core.jl")
 include("emulator.jl")
