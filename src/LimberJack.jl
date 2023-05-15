@@ -11,7 +11,6 @@ export make_data
 
 using Interpolations, LinearAlgebra, Statistics, QuadGK
 using NPZ, NumericalIntegration, PythonCall
-using ForwardDiff #Optim, Turing
 
 include("core.jl")
 include("emulator.jl")
