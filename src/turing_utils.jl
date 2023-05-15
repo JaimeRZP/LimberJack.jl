@@ -19,7 +19,6 @@ function get_MAP(loglike::Function,
     opt = optimize((v)->-loglike(v), lower_bound, upper_bound, start_value, Fminbox())
     return Optim.minimizer(opt)
 end
-=#
 
 function get_mass_matrix(loglike::Function, MAP)
 
@@ -34,6 +33,7 @@ function get_mass_matrix(loglike::Function, MAP)
     hess_cov = convert(Matrix{Float64}, hess_cov)
     return hess_cov
 end
+=#
 
 function Theory(cosmology::Cosmology,
                 names, types, pairs,
@@ -110,6 +110,7 @@ function Theory(cosmology::Cosmology,
                   Nuisances=Nuisances)
  end
 
+#=
 function Theory_st(cosmology::Cosmology,
                 names, types, pairs,
                 idx, files;
@@ -184,3 +185,4 @@ function Theory_st(cosmology::Cosmology,
                   idx, files;
                   Nuisances=Nuisances)
  end
+ =#
