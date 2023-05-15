@@ -204,7 +204,7 @@ Cosmology(cpar::CosmoPar, settings::Settings) = begin
     zs_pk = LinRange(0., 3.0, nz_pk)
     zs = range(0., stop=3.0, length=nz)
     # Compute linear power spectrum at z=0.
-    logk = range(log(0.0001), stop=log(7.0), length=nk)
+    logk = range(log(0.0001), stop=log(100.0), length=nk)
     ks = exp.(logk)
     dlogk = log(ks[2]/ks[1])
     if settings.tk_mode == "emulator"
@@ -338,7 +338,7 @@ Returns:
 
 """
 Cosmology(Ωm, Ωb, h, n_s, σ8; 
-          θCMB=2.725/2.7, nk=300, nz=300, nz_pk=70,  nz_t=200,
+          θCMB=2.725/2.7, nk=500, nz=300, nz_pk=70,  nz_t=400,
           tk_mode="BBKS", Pk_mode="linear",
           emul_path= "../emulator/files.npz",
           custom_Dz=nothing) = begin

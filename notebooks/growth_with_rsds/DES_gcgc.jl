@@ -83,7 +83,6 @@ end
                     # "alpha_IA" => alpha_IA,)
 
     cosmology = Cosmology(Ωm, Ωb, h, ns, s8;
-                          nz_t=300
                           tk_mode="EisHu",
                           Pk_mode="Halofit")
 
@@ -111,7 +110,7 @@ println("nchains ", nchains)
 
 # Start sampling.
 folpath = "../../chains/NUTS/standard_runs/"
-folname = string("DESY1_gcgc_EisHu_high_res")
+folname = string("DESY1_gcgc_EisHu")
 folname = joinpath(folpath, folname)
 
 if isdir(folname)

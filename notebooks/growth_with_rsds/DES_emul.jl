@@ -109,7 +109,7 @@ println("adaptation ", adaptation)
 println("nchains ", nchains)
 
 # Start sampling.
-folpath = "../../chains/NUTS/standard_runs/"
+folpath = "../../chains/NUTS/17_runs/"
 folname = string("DESY1_emul")
 folname = joinpath(folpath, folname)
 
