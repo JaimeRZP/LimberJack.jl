@@ -1,3 +1,4 @@
+#=
 function Loglike(model, MAP_names)
 
     function LL(MAP_vals;
@@ -18,6 +19,7 @@ function get_MAP(loglike::Function,
     opt = optimize((v)->-loglike(v), lower_bound, upper_bound, start_value, Fminbox())
     return Optim.minimizer(opt)
 end
+=#
 
 function get_mass_matrix(loglike::Function, MAP)
 
