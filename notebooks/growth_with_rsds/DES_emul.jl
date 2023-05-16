@@ -79,7 +79,7 @@ cov = meta.cov
                      "A_IA" => A_IA,
                      "alpha_IA" => alpha_IA,)
 
-    cosmology = Cosmology(Ωm, Ωb, h, ns, s8,
+    cosmology = Cosmology(Ωm, Ωb, h, ns, σ8,
                           tk_mode="emulator",
                           Pk_mode="Halofit",
                           emul_path="../../emulator/files.npz")
