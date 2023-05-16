@@ -100,7 +100,7 @@ println("adaptation ", adaptation)
 #println("nchains ", nchains)
 
 # Start sampling.
-folpath = "../../chains/NUTS/19_runs/"
+folpath = "../../chains/NUTS/18_runs/"
 folname = string("DESY1_wlwl_EisHu")
 folname = joinpath(folpath, folname)
 

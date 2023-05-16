@@ -1,42 +1,40 @@
-using Distributed
-@everywhere begin
-    using LinearAlgebra
-    using Turing
-    using LimberJack
-    using CSV
-    using YAML
-    using PythonCall
-    sacc = pyimport("sacc");
+using LinearAlgebra
+using Turing
+using LimberJack
+using CSV
+using NPZ
+using YAML
+using PythonCall
+sacc = pyimport("sacc");
 
-    println("My id is ", myid(), " and I have ", Threads.nthreads(), " threads")
+#println("My id is ", myid(), " and I have ", Threads.nthreads(), " threads")
 
-    sacc_path = "../../data/FD/cls_FD_covG.fits"
-    yaml_path = "../../data/DESY1/gcgc_gcwl_wlwl.yml"
-    nz_path = "../../data/DESY1/nzs"
-    sacc_file = sacc.Sacc().load_fits(sacc_path)
-    yaml_file = YAML.load_file(yaml_path)
-    #nz_DESwl__0 = npzread(string(nz_path, "nz_DESwl__0.npz"))
-    #nz_DESwl__1 = npzread(string(nz_path, "nz_DESwl__1.npz"))
-    #nz_DESwl__2 = npzread(string(nz_path, "nz_DESwl__2.npz"))
-    #nz_DESwl__3 = npzread(string(nz_path, "nz_DESwl__3.npz"))
-    meta, files = make_data(sacc_file, yaml_file)
-                            #nz_DESwl__0=nz_DESwl__0,
-                            #nz_DESwl__1=nz_DESwl__1,
-                            #nz_DESwl__2=nz_DESwl__2,
-                            #nz_DESwl__3=nz_DESwl__3)
+sacc_path = "../../data/FD/cls_FD_covG.fits"
+yaml_path = "../../data/DESY1/gcgc_gcwl_wlwl.yml"
+nz_path = "../../data/DESY1/nzs"
+sacc_file = sacc.Sacc().load_fits(sacc_path)
+yaml_file = YAML.load_file(yaml_path)
+#nz_DESwl__0 = npzread(string(nz_path, "nz_DESwl__0.npz"))
+#nz_DESwl__1 = npzread(string(nz_path, "nz_DESwl__1.npz"))
+#nz_DESwl__2 = npzread(string(nz_path, "nz_DESwl__2.npz"))
+#nz_DESwl__3 = npzread(string(nz_path, "nz_DESwl__3.npz"))
+meta, files = make_data(sacc_file, yaml_file)
+                        #nz_DESwl__0=nz_DESwl__0,
+                        #nz_DESwl__1=nz_DESwl__1,
+                        #nz_DESwl__2=nz_DESwl__2,
+                        #nz_DESwl__3=nz_DESwl__3)
 
-    data = meta.data
-    cov = meta.cov
-end 
+data = meta.data
+cov = meta.cov
 
-@everywhere @model function model(data;
-                                  meta=meta, 
-                                  files=files)
+@model function model(data;
+    meta=meta, 
+    files=files)
     #KiDS priors
     Ωm ~ Uniform(0.2, 0.6)
     Ωb ~ Uniform(0.028, 0.065)
     h ~ Truncated(Normal(0.72, 0.05), 0.64, 0.82)
-    s8 ~ Uniform(0.4, 1.2)
+    σ8 ~ Uniform(0.4, 1.2)
     ns ~ Uniform(0.84, 1.1)
 
     DESgc__0_b ~ Uniform(0.8, 3.0)
@@ -82,31 +80,25 @@ end
                      "alpha_IA" => alpha_IA,)
 
     cosmology = Cosmology(Ωm, Ωb, h, ns, s8,
-                         tk_mode="emulator",
-                         Pk_mode="Halofit",
-                         emul_path="../../emulator/files.npz")
+                          tk_mode="emulator",
+                          Pk_mode="Halofit",
+                          emul_path="../../emulator/files.npz")
+                     
 
     theory = Theory(cosmology, meta, files; Nuisances=nuisances)
     data ~ MvNormal(theory, cov)
 end
 
-cycles = 6
 iterations = 500
-nchains = nprocs()
-
 adaptation = 500
 TAP = 0.65
 init_ϵ = 0.01
 
-cond_model = model(data)
-sampler = NUTS(adaptation, TAP)
-
 println("sampling settings: ")
-println("cycles ", cycles)
 println("iterations ", iterations)
 println("TAP ", TAP)
 println("adaptation ", adaptation)
-println("nchains ", nchains)
+#println("nchains ", nchains)
 
 # Start sampling.
 folpath = "../../chains/NUTS/18_runs/"
@@ -119,9 +111,9 @@ if isdir(folname)
     if length(fol_files) != 0
         last_chain = last([file for file in fol_files if occursin("chain", file)])
         last_n = parse(Int, last_chain[7])
-        println("Restarting chain")
+        #println("Restarting chain")
     else
-        println("Starting new chain")
+        #println("Starting new chain")
         last_n = 0
     end
 else
@@ -130,16 +122,33 @@ else
     last_n = 0
 end
 
+# Create a placeholder chain file.
+CSV.write(joinpath(folname, string("chain_", last_n+1,".csv")), Dict("samples"=>[]))
+
+# Sample
+cond_model = model(data)
+sampler = NUTS(adaptation, TAP)
+chain = sample(cond_model, sampler, iterations;
+                progress=true, save_state=true)
+
+# Save the actual chain.                
+# write(joinpath(folname, string("chain_", last_n+1,".jls")), chain)
+CSV.write(joinpath(folname, string("chain_", last_n+1,".csv")), chain)
+CSV.write(joinpath(folname, string("summary_", last_n+1,".csv")), describe(chain)[1])
+
+#=
 for i in (1+last_n):(cycles+last_n)
     if i == 1
-        chain = sample(cond_model, sampler, MCMCDistributed(),
-                       iterations, nchains, progress=true; save_state=true)
+        CSV.write(joinpath(folname, string("chain_", i,".csv")), Dict("samples"=>[]))
+        chain = sample(cond_model, sampler, iterations;
+                       progress=true, save_state=true)
     else
         old_chain = read(joinpath(folname, string("chain_", i-1,".jls")), Chains)
-        chain = sample(cond_model, sampler, MCMCDistributed(),
-                       iterations, nchains, progress=true; save_state=true, resume_from=old_chain)
+        chain = sample(cond_model, sampler, iterations;
+                       progress=true, save_state=true, resume_from=old_chain)
     end  
     write(joinpath(folname, string("chain_", i,".jls")), chain)
     CSV.write(joinpath(folname, string("chain_", i,".csv")), chain)
     CSV.write(joinpath(folname, string("summary_", i,".csv")), describe(chain)[1])
 end
+=#
