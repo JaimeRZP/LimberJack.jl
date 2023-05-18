@@ -1,45 +1,36 @@
-using Distributed
+using LinearAlgebra
+using Turing
+using LimberJack
+using GaussianProcess
+using CSV
+using NPZ
+using YAML
+using PythonCall
+sacc = pyimport("sacc");
 
-@everywhere begin
-    using LinearAlgebra
-    using Turing
-    using LimberJack
-    using GaussianProcess
-    using CSV
-    using NPZ
-    using YAML
-    using PythonCall
-    sacc = pyimport("sacc");
-    
-    println("My id is ", myid(), " and I have ", Threads.nthreads(), " threads")
+println("My id is ", myid(), " and I have ", Threads.nthreads(), " threads")
 
-    sacc_path = "../../data/FD/cls_FD_covG.fits"
-    yaml_path = "../../data/ND/ND.yml"
-    sacc_file = sacc.Sacc().load_fits(sacc_path)
-    yaml_file = YAML.load_file(yaml_path)
-    meta, files = make_data(sacc_file, yaml_file)
-    
-    data_vector = meta.data
-    cov_tot = meta.cov
+sacc_path = "../../data/FD/cls_FD_covG.fits"
+yaml_path = "../../data/ND/ND.yml"
+sacc_file = sacc.Sacc().load_fits(sacc_path)
+yaml_file = YAML.load_file(yaml_path)
+meta, files = make_data(sacc_file, yaml_file)
 
-    errs = sqrt.(diag(cov_tot))
-    fake_data = data_vector ./ errs
-    fake_cov = Hermitian(cov_tot ./ (errs * errs')) 
+data = meta.data
+cov = meta.cov
 
-    fid_cosmo = Cosmology()
-    n = 101
-    N = 201
-    latent_x = range(0., stop=3., length=n)
-    x = range(0., stop=3., length=N)
-end
+fid_cosmo = Cosmology()
+n = 101
+N = 201
+latent_x = range(0., stop=3., length=n)
+x = range(0., stop=3., length=N)
             
-@everywhere @model function model(data;
-                                  meta=meta,
-                                  files=files,
-                                  cov=fake_cov,
-                                  fid_cosmo=fid_cosmo,
-                                  latent_x=latent_x,
-                                  x=x)
+@model function model(data;
+    meta=meta,
+    files=files,
+    fid_cosmo=fid_cosmo,
+    latent_x=latent_x,
+    x=x)
 
     #KiDS priors
     Ωm ~ Uniform(0.2, 0.6)
@@ -120,32 +111,22 @@ end
     
     theory = Theory(cosmology, meta, files; Nuisances=nuisances)
     
-    data ~ MvNormal(theory ./ errs, cov)
+    data ~ MvNormal(theory, cov)
 end;
 
-cycles = 6
-iterations = 100
-nchains = nprocs()
-
-TAP = 0.60
-adaptation = 300
-init_ϵ1 = 0.005
-init_ϵ2 = 0.005
-
-stats_model = model(fake_data)
-sampler = Gibbs(NUTS(adaptation, TAP, :Ωm, :Ωb, :h, :ns),
-                NUTS(adaptation, TAP, :v))
+iterations = 500
+adaptation = 500
+TAP = 0.65
+init_ϵ = 0.005
 
 println("sampling settings: ")
-println("cycles ", cycles)
 println("iterations ", iterations)
 println("TAP ", TAP)
 println("adaptation ", adaptation)
-println("nchains ", nchains)
 
 # Start sampling.
-folpath = "../../chains"
-folname = string("ND_super_gp_2_Gibbs_TAP_", TAP)
+folpath = "../../chains/NUTS/18_runs/"
+folname = string("ND_super_gp_TAP_", TAP)
 folname = joinpath(folpath, folname)
 
 if isdir(folname)
@@ -154,9 +135,9 @@ if isdir(folname)
     if length(fol_files) != 0
         last_chain = last([file for file in fol_files if occursin("chain", file)])
         last_n = parse(Int, last_chain[7])
-        println("Restarting chain")
+        #println("Restarting chain")
     else
-        println("Starting new chain")
+        #println("Starting new chain")
         last_n = 0
     end
 else
@@ -165,16 +146,16 @@ else
     last_n = 0
 end
 
-for i in (1+last_n):(cycles+last_n)
-    if i == 1
-        chain = sample(stats_model, sampler, MCMCDistributed(),
-                       iterations, nchains, progress=true; save_state=true)
-    else
-        old_chain = read(joinpath(folname, string("chain_", i-1,".jls")), Chains)
-        chain = sample(stats_model, sampler, MCMCDistributed(),
-                       iterations, nchains, progress=true; save_state=true, resume_from=old_chain)
-    end 
-    write(joinpath(folname, string("chain_", i,".jls")), chain)
-    CSV.write(joinpath(folname, string("chain_", i,".csv")), chain)
-    CSV.write(joinpath(folname, string("summary_", i,".csv")), describe(chain)[1])
-end
+# Create a placeholder chain file.
+CSV.write(joinpath(folname, string("chain_", last_n+1,".csv")), Dict("samples"=>[]))
+
+# Sample
+cond_model = model(data)
+sampler = NUTS(adaptation, TAP; init_ϵ=init_ϵ)
+chain = sample(cond_model, sampler, iterations;
+                progress=true, save_state=true)
+
+# Save the actual chain.                
+# write(joinpath(folname, string("chain_", last_n+1,".jls")), chain)
+CSV.write(joinpath(folname, string("chain_", last_n+1,".csv")), chain)
+CSV.write(joinpath(folname, string("summary_", last_n+1,".csv")), describe(chain)[1])

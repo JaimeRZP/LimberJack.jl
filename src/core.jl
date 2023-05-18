@@ -14,12 +14,12 @@ function _w_tophat(x::Real)
     return w
 end    
 
-function _σR2(ks, pk, dlogk, R)
+function σR2(ks, pk, dlogk, R)
     x = ks .* R
     wk = _w_tophat.(x)
-    integ = @. pk * wk^2 * ks^3
-    # OPT: proper integration instead?
-    return sum(integ)*dlogk/(2*pi^2)
+    integrand = @. pk * wk^2 * ks^3
+    σ = integrate(log.(ks), integrand, SimpsonEven())/(2*pi^2)
+    return σ
 end
 
 """
