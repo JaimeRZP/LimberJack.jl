@@ -8,7 +8,7 @@ using YAML
 using PythonCall
 sacc = pyimport("sacc");
 
-println("My id is ", myid(), " and I have ", Threads.nthreads(), " threads")
+#println("My id is ", myid(), " and I have ", Threads.nthreads(), " threads")
 
 sacc_path = "../../data/FD/cls_FD_covG.fits"
 yaml_path = "../../data/ND/ND.yml"
