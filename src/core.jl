@@ -14,7 +14,7 @@ function _w_tophat(x::Real)
     return w
 end    
 
-function σR2(ks, pk, dlogk, R)
+function _σR2(ks, pk, dlogk, R)
     x = ks .* R
     wk = _w_tophat.(x)
     integrand = @. pk * wk^2 * ks^3
