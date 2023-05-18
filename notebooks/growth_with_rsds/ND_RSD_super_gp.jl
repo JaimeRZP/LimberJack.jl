@@ -39,7 +39,6 @@ x = range(0., stop=3., length=N)
 @model function model(data;
     meta=meta,
     files=files,
-    cov=fake_cov,
     fid_cosmo=fid_cosmo,
     latent_x=latent_x,
     x=x)
