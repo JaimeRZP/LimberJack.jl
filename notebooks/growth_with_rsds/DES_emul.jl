@@ -31,11 +31,14 @@ cov = meta.cov
     meta=meta, 
     files=files)
     #KiDS priors
-    Ωm ~ Uniform(0.2, 0.6)
-    Ωb ~ Uniform(0.028, 0.065)
+    wc ~ Uniform(0.06, 0.40)
+    wb ~ Uniform(0.019, 0.026)
     h ~ Truncated(Normal(0.72, 0.05), 0.64, 0.82)
     σ8 ~ Uniform(0.4, 1.2)
     ns ~ Uniform(0.84, 1.1)
+
+    Ωm = (wc + wb)/h^2
+    Ωb = wb/h^2
 
     DESgc__0_b ~ Uniform(0.8, 3.0)
     DESgc__1_b ~ Uniform(0.8, 3.0)
@@ -102,7 +105,7 @@ println("adaptation ", adaptation)
 
 # Start sampling.
 folpath = "../../chains/NUTS/18_runs/"
-folname = string("DESY1_emul")
+folname = string("DESY1_emul_ws")
 folname = joinpath(folpath, folname)
 
 if isdir(folname)
