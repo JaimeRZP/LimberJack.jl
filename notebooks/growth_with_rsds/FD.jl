@@ -10,7 +10,7 @@ sacc = pyimport("sacc");
 #println("My id is ", myid(), " and I have ", Threads.nthreads(), " threads")
 
 sacc_path = "../../data/FD/cls_FD_covG.fits"
-yaml_path = "../../dataFD/FD.yml"
+yaml_path = "../../data/FD/FD.yml"
 sacc_file = sacc.Sacc().load_fits(sacc_path)
 yaml_file = YAML.load_file(yaml_path)
 meta, files = make_data(sacc_file, yaml_file)
