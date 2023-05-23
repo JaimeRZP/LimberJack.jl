@@ -91,7 +91,7 @@ function make_cls(p)
 
     theory = Theory(cosmology, meta, files; Nuisances=nuisances)
     diff = data .- theory
-    return dot(diff * inv_cov, diff)
+    return dot(diff, inv_cov * diff)
 end
 
 @benchmark make_cls(p)
