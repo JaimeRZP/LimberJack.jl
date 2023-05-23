@@ -25,7 +25,7 @@ meta, files = make_data(sacc_file, yaml_file)
                         #nz_DESwl__3=nz_DESwl__3)
 
 data = meta.data
-cov = meta.cov
+inv_cov = meta.inv_cov
 
 p = [ 2.80864713e-01,  3.98941817e-02,  8.03805162e-01,  8.15499178e-01,
 9.67896094e-01,  1.45433358e+00,  1.77905433e+00,  1.70409115e+00,
@@ -89,7 +89,9 @@ function make_cls(p)
                           tk_mode="EisHu",
                           Pk_mode="Halofit")
 
-    return Theory(cosmology, meta, files; Nuisances=nuisances)
+    theory = Theory(cosmology, meta, files; Nuisances=nuisances)
+    diff = data .- theory
+    return dot(diff * inv_cov, diff)
 end
 
 @benchmark make_cls(p)
