@@ -44,11 +44,14 @@ x = range(0., stop=3., length=N)
     x=x)
 
     #KiDS priors
-    Ωm ~ Uniform(0.2, 0.6)
-    Ωb ~ Uniform(0.028, 0.065)
+    wc ~ Uniform(0.06, 0.40)
+    wb ~ Uniform(0.019, 0.026)
     h ~ Uniform(0.64, 0.82)
     ns ~ Uniform(0.84, 1.1)
     s8 = 0.811
+
+    Ωm = (wc + wb)/h^2
+    Ωb = wb/h^2
     
     DESgc__0_b = 1.48 #~ Uniform(0.8, 3.0)
     DESgc__1_b = 1.81 #~ Uniform(0.8, 3.0)

@@ -30,6 +30,7 @@ cov = meta.cov
 @model function model(data;
     meta=meta, 
     files=files)
+    
     #KiDS priors
     wc ~ Uniform(0.06, 0.40)
     wb ~ Uniform(0.019, 0.026)
