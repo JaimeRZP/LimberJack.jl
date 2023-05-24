@@ -125,7 +125,7 @@ cov = meta.cov
                      "KiDS1000__4_m" => KiDS1000__4_m)
 
     
-    cosmology = LimberJack.Cosmology(Ωm, Ωb, h, ns, s8,
+    cosmology = LimberJack.Cosmology(Ωm, Ωb, h, ns, σ8,
                                      tk_mode="emulator",
                                      Pk_mode="Halofit", 
                                      emul_path="../../emulator/files.npz")
