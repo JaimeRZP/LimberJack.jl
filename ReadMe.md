@@ -70,14 +70,8 @@ This essentially updates the ```Interpolations``` installations inside and outsi
     # Import
     using LimberJack
     
-    Ωm = 0.31
-    s8 = 0.81
-    Ωb = 0.05
-    h = 0.67
-    ns = 0.96
-    
     # create LimberJack.jl Cosmology instance
-    cosmology = Cosmology(Ωm, Ωb, h, ns, s8;
+    cosmology = Cosmology(Ωm=0.30, Ωb=0.05, h=0.70, ns=0.96, s8=0.81;
                           tk_mode="EisHu",
                           Pk_mode="Halofit")
     
@@ -87,11 +81,6 @@ This essentially updates the ```Interpolations``` installations inside and outsi
     ls = [10.0, 30.0, 100.0, 300.0]
     cls = angularCℓs(cosmology, tracer, tracer, ls)
 ```
-
-
-## Benchmarks
-
-![](https://raw.githubusercontent.com/JaimeRZP/LimberJack.jl/main/docs/src/assets/LimberJack_benchmarks.png)
 
 ## Challenges
 
