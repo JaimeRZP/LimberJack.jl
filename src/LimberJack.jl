@@ -3,7 +3,7 @@ module LimberJack
 export Settings, CosmoPar, Cosmology, Ez, Hmpc, comoving_radial_distance
 export growth_factor, growth_rate, fs8, sigma8
 export lin_Pk, nonlin_Pk
-export NumberCountsTracer, WeakLensingTracer, CMBLensingTracer
+export NumberCountsTracer, WeakLensingTracer, CMBLensingTracer, get_IA
 export angularCℓs, angularCℓ, angularCℓFast
 export Theory
 export make_data

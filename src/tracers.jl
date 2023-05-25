@@ -46,20 +46,6 @@ NumberCountsTracer(cosmo::Cosmology, z_n, nz; kwargs...) = begin
 end
 
 """
-    WeakLensingTracer(warr, chis, wint, b, lpre)
-Weak lensing tracer structure. 
-Arguments:
-- `wint::Interpolation` : interpolation of the radial kernel over comoving distance.
-- `F::Function` : prefactor.
-Returns:
-- `WeakLensingTracer::WeakLensingTracer` : Weak lensing tracer structure.
-"""
-struct WeakLensingTracer <: Tracer
-    wint::AbstractInterpolation
-    F::Function
-end
-
-"""
     WeakLensingTracer(cosmo::Cosmology, z_n, nz; kwargs...)
 Weak lensing tracer structure constructor. 
 Arguments:
@@ -73,6 +59,11 @@ Kwargs:
 Returns:
 - `WeakLensingTracer::WeakLensingTracer` : Weak lensing tracer structure.
 """
+struct WeakLensingTracer <: Tracer
+    wint::AbstractInterpolation
+    F::Function
+end
+
 WeakLensingTracer(cosmo::Cosmology, z_n, nz; kwargs...) = begin
     z_range = range(z_n[1], stop=z_n[end], length=length(z_n))
     nz_int = cubic_spline_interpolation(z_range, nz, extrapolation_bc=0)
@@ -137,8 +128,6 @@ end
 CMB lensing tracer structure. 
 Arguments:
 - `cosmo::Cosmology` : cosmology structure.
-Kwargs:
-- `nchi::Int = 100` : number of nodes in the comoving distance array. 
 Returns:
 - `CMBLensingTracer::CMBLensingTracer` : CMB lensing tracer structure.
 """

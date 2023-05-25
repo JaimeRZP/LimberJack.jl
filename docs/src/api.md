@@ -42,6 +42,7 @@ Moreover, tracers within ```LimberJack.jl``` tracer objects have their own type 
 LimberJack.NumberCountsTracer
 LimberJack.WeakLensingTracer
 LimberJack.CMBLensingTracer
+LimberJack.get_IA
 ```
 
 ## Spectra

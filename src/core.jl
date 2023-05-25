@@ -1,22 +1,49 @@
 """
-    Settings(cosmo_type, nz, nz_pk, nk, tk_mode, pk_mode, custom_Dz)
+    Settings(;kwargs...)
 
-Cosmology constructor settings structure. 
+Constructor of settings structure constructor. 
 
-Arguments:
+Kwargs:
 
-- `cosmo_type::Type` : type of cosmological parameters. 
 - `nz::Int` : number of nodes in the general redshift array.
-- `nz_pk::Int` : number of nodes in the redshift array used for matter power spectrum.
-- `nk::Int`: number of nodes in the matter power spectrum.
+- `nz_pk::Int` : number of nodes in the redshift array used to compute matter power spectrum grid.
+- `nz_t::Int` : number of nodes in the general redshift array.
+- `nk::Int`: number of nodes in the k-scale array used to compute matter power spectrum grid.
+- `nℓ::Int`: number of nodes in the multipoles array.
+- `using_As::Bool`: `True` if using the `As` parameter.
+- `cosmo_type::Type` : type of cosmological parameters. 
 - `tk_mode::String` : choice of transfer function.
-- `Pk_mode::String` : choice of matter power spectrum.
+- `Dz_mode::String` : choice of method to compute the linear growth factor.
+- `Pk_mode::String` : choice of method to apply non-linear corrections to the matter power spectrum.
 - `custom_Dz::Any` : custom growth factor.
+- `emul_files` : emulator arrays. 
 
 Returns:
+```
+mutable struct Settings
+    nz::Int
+    nz_pk::Int
+    nz_t::Int
+    nk::Int
+    nℓ::Int
 
-- `Settings` : cosmology settings.
+    zs
+    zs_pk
+    zs_t
+    ks
+    ℓs
+    logk
+    dlogk
 
+    using_As::Bool
+
+    cosmo_type::DataType
+    tk_mode::String
+    Dz_mode::String
+    Pk_mode::String
+    emul_files
+end        
+``` 
 """
 mutable struct Settings
     nz::Int
@@ -69,26 +96,47 @@ Settings(;kwargs...) = begin
              using_As,
              cosmo_type, tk_mode, Dz_mode, Pk_mode, emul_files)
 end
+
 """
-    CosmoPar(Ωm, Ωb, h, n_s, σ8, θCMB, Ωr, ΩΛ)
+    CosmoPar(kwargs...)
 
-Cosmology parameters structure.  
+Cosmology parameters structure constructor.  
 
-Arguments:
+Kwargs:
 
 - `Ωm::Dual` : cosmological matter density. 
 - `Ωb::Dual` : cosmological baryonic density.
 - `h::Dual` : reduced Hubble parameter.
-- `n_s::Dual` : spectral index.
+- `ns::Dual` : Harrison-Zeldovich spectral index.
+- `As::Dual` : Harrison-Zeldovich spectral amplitude.
 - `σ8::Dual`: variance of the matter density field in a sphere of 8 Mpc.
-- `θCMB::Dual` : CMB temperature.
-- `Ωr::Dual` : cosmological radiation density.
-- `ΩΛ::Dual` : cosmological dark energy density.
+- `Y_p::Dual`: primordial helium fraction.
+- `N_ν::Dual`: effective number of relativisic species (PDG25 value).
+- `Σm_ν::Dual`: sum of neutrino masses (eV), Planck 15 default ΛCDM value.
+- `θCMB::Dual`: CMB temperature over 2.7.
+- `Ωg::Dual`: cosmological density of relativistic species.
+- `Ωr::Dual`: cosmological radiation density.
 
 Returns:
 
-- `CosmoPar` : cosmology parameters structure.
-
+```
+mutable struct CosmoPar{T}
+    Ωm::T
+    Ωb::T
+    h::T
+    ns::T
+    As::T
+    σ8::T
+    θCMB::T
+    Y_p::T
+    N_ν::T
+    Σm_ν::T
+    Ωg::T
+    Ωr::T
+    Ωc::T
+    ΩΛ::T
+end     
+``` 
 """
 mutable struct CosmoPar{T}
     Ωm::T
@@ -107,19 +155,6 @@ mutable struct CosmoPar{T}
     ΩΛ::T
 end
 
-"""
-    CosmoPar(Ωm, Ωb, h, n_s, σ8, θCMB)
-Cosmology parameters structure constructor.
-Arguments:
-- `Ωm::Dual` : cosmological matter density.
-- `Ωb::Dual` : cosmological baryonic density.
-- `h::Dual` : reduced Hubble parameter.
-- `n_s::Dual` : spectral index.
-- `σ8::Dual`: variance of the matter density field in a sphere of 8 Mpc.
-- `θCMB::Dual` : CMB temperature.
-Returns:
-- `CosmoPar` : cosmology parameters structure.
-"""
 CosmoPar(;kwargs...) = begin
     kwargs = Dict(kwargs)
 
@@ -151,27 +186,6 @@ function _get_cosmo_type(x::CosmoPar{T}) where{T}
     return T
 end
 
-"""
-    Cosmology
-
-Base cosmology structure.  
-
-Arguments:
-- `settings::MutableStructure` : cosmology constructure settings. 
-- `cpar::MutableStructure` : cosmological parameters.
-- `chi::Dual` : comoving distance array.
-- `z_of_chi::Dual` : redshift of comoving distance array.
-- `chi_max::Dual` : upper bound of comoving distance array.
-- `chi_LSS::Dual` : comoving distance to suface of last scattering.
-- `Dz::Dual` : growth factor.
-- `fs8z::Dual` : fs8.
-- `PkLz0::Dual` : interpolator of log primordial power spectrum over k-scales.
-- `Pk::Dual` : matter power spectrum.
-
-Returns:
-- `CosmoPar` : cosmology parameters structure.
-
-"""
 struct Cosmology
     settings::Settings
     cpar::CosmoPar
