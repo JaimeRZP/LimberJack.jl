@@ -30,23 +30,18 @@ LimberJack.fs8
 LimberJack.lin_Pk
 LimberJack.nonlin_Pk
 ```
+## Tracers
 
-## Emulator
-
-Implements the Mootoovaloo et al (2021) emulator (https://arxiv.org/abs/2105.02256) for the primordial matter power spectrum.
-The emulator is imported as a linear model stored in ```emulator/files.npz```.
-
-```@docs
-LimberJack.Emulator
-LimberJack.get_emulated_log_pk0
-```
-
-## Halofit
-
-Implements the Halotfit fitting formula for the non-linear matter power spectrum as described as Smith et al (2003) (https://arxiv.org/abs/astro-ph/0207664)
+In ```LimberJack.jl``` each tracer is ```structure``` containing at least of three fields:
++ ```wint```: an interpolator between ```chis``` and ```warr```.
++ ```F```: an interpolator between ```chis``` and ```warr```.
+On top of these, tracers might contain the value of any nuisance parameter associated with them.
+Moreover, tracers within ```LimberJack.jl``` tracer objects have their own type called ```Tracer```.
 
 ```@docs
-LimberJack.get_PKnonlin
+LimberJack.NumberCountsTracer
+LimberJack.WeakLensingTracer
+LimberJack.CMBLensingTracer
 ```
 
 ## Spectra
@@ -57,18 +52,20 @@ Performs the computation of the angular power spectra of any two tracers.
 LimberJack.Cℓintegrand
 LimberJack.angularCℓs
 ```
+## Data Utils
 
-## Tracers
-
-In ```LimberJack.jl``` each tracer is ```structure``` containing at least of three fields:
-+ ```warr```: an array of values of the kernel of the tracer.
-+ ```chis```: the array of comoving distances at which ```warr``` was associated.
-+ ```wint```: an interpolator between ```chis``` and ```warr```.
-On top of these, tracers might contain the value of any nuisance parameter associated with them.
-Moreover, tracers within ```LimberJack.jl``` tracer objects have their own type called ```Tracer```.
+Parses ```sacc```  and ```YAML``` files.
 
 ```@docs
-LimberJack.NumberCountsTracer
-LimberJack.WeakLensingTracer
-LimberJack.CMBLensingTracer
+LimberJack.make_data
 ```
+
+## Theory
+
+Performs the computation of complex theory vectors given ```sacc```  and ```YAML``` files.
+
+```@docs
+LimberJack.Theory
+```
+
+

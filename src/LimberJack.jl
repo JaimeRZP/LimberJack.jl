@@ -5,7 +5,7 @@ export growth_factor, growth_rate, fs8, sigma8
 export lin_Pk, nonlin_Pk
 export NumberCountsTracer, WeakLensingTracer, CMBLensingTracer
 export angularCℓs, angularCℓ, angularCℓFast
-export Theory, TheoryFast
+export Theory
 export make_data
 
 using Interpolations, LinearAlgebra, Statistics, QuadGK, Bolt

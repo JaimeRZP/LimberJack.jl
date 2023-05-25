@@ -5,15 +5,6 @@ function _T0(keq, k, ac, bc)
     return T0
 end
 
-"""
-    TkEisHu(cosmo::CosmoPar, k)
-Computes the primordial power spectrum using the Einsentein & Hu formula (arXiv:astro-ph/9710252).
-Arguments:
-- `cosmo::CosmoPar` : cosmological parameters structure
-- `k::Vector{Dual}` : scales array
-Returns:
-- `Tk::Vector{Dual}` : transfer function.
-"""
 function TkEisHu(cosmo::CosmoPar, k)
     Ωc = cosmo.Ωm-cosmo.Ωb
     wm=cosmo.Ωm*cosmo.h^2
@@ -68,21 +59,6 @@ function TkEisHu(cosmo::CosmoPar, k)
     return Tk.^2
 end
 
-"""
-    Emulator()
-Emulator structure.
-Arguments:
-- `alphas::Matrix` : emulator's linear model for each k-scale
-- `hypers`::Matrix : hyperparameters for each k-scale
-- `trans_cosmos::Vector{Array}` : transformed cosmological parameters
-- `training_karr::Vector{Float}` : array of k-scales at which the emulator was trained
-- `inv_chol_cosmos::Matrix` : inverse Cholesky decomposition of training matter power spectra
-- `mean_cosmos::Vector{Float}` : mean training cosmology
-- `mean_log_Pks::Vector{Float}` : mean of the log training matter power spectra
-- `std_log_Pks::Vector{Float}` : standard deviation of the log training matter power spectrum
-Returns:
-- `emulator::Structure` : emulator structure.
-"""
 struct Emulator
     alphas
     hypers
@@ -94,15 +70,6 @@ struct Emulator
     std_log_Pks
 end
 
-"""
-    Emulator(; path="../emulator/files.npz")
-Emulator structure constructure.
-Loads emulator files into the `Emulator` structure.
-Arguments:
-- `path::String` : path to emulator files
-Returns:
-- `emulator::Structure` : emulator structure.
-"""
 Emulator(files) = begin
     trans_cosmos = files["trans_cosmos"]
     karr = files["training_karr"]
@@ -146,16 +113,6 @@ function _get_kernel(arr1, arr2, hyper)
     return kernel
 end
 
-"""
-    get_emulated_log_pk0(cosmo::CosmoPar)
-Given a `CosmoPar` instance, emulates the value of the primordial \
-matter power spectrum at the training k-scales.
-Arguments:
-- `CosmoPar::Stucture` : cosmological paramters structure
-Returns:
-- `karr::Vector{Float}` : array of training k-scales
-- `log_pk0s::Vector{Dual}` : array of emulated log matter power spectrum
-"""
 function get_emulated_log_pk0(cpar::CosmoPar, settings::Settings)
     emulator = Emulator(settings.emul_files)
     cosmotype = settings.cosmo_type
@@ -175,7 +132,7 @@ function get_emulated_log_pk0(cpar::CosmoPar, settings::Settings)
     return emulator.training_karr, pk0s
 end
 
-function get_Bolt_pk0(cpar::CosmoPar, settings)
+function get_Bolt_pk0(cpar::CosmoPar, settings::Settings)
     𝕡 = Bolt.CosmoParams(h = cpar.h,
                     Ω_r = cpar.Ωg,
                     Ω_b = cpar.Ωb,
@@ -236,7 +193,7 @@ function lin_Pk0(cpar::CosmoPar, settings::Settings)
         tk = TkEisHu(cpar, settings.ks./ cpar.h)
         pk0 = @. settings.ks^cpar.ns * tk
      else
-        print("Transfer function not implemented")
+        @error("Transfer function not implemented")
     end
 
     #Renormalize Pk

@@ -24,23 +24,6 @@ function _get_σ2(lks, ks, pks, R, kind)
     return integral
 end
 
-"""
-    get_PKnonlin(cosmo::CosmoPar, z, k, PkLz0, Dzs, cosmo_type::DataType)
-
-Uses the Halofit (arXiv:astro-ph/0207664) model to calculate the non-linear matter power spectrum.
-
-Arguments:
-- `CosmoPar::Stucture` : cosmological paramters structure
-- `z::Vector{Dual}` : array of redshifts
-- `k::Vector{Dual}` : array of k-scales
-- `PkLz0::Interpolator` : log primordial power spectrum interpolator as a function of log k-scale
-- `Dzs::Vector{Dual}` : growth factor evaluated at redshift array
-- `cosmo_type::Type` : type of cosmological parameters
-
-Returns:
-- `pk_NL(logk, z)::Interpolator` : non-linear matter spectrum as a function of log k-scale and redshift
-
-"""
 function get_PKnonlin(cpar::CosmoPar, z, k, PkLz0, Dzs; cosmo_type::DataType=Real)
     nk = length(k)
     nz = length(z)

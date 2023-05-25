@@ -152,25 +152,19 @@ function _get_cosmo_type(x::CosmoPar{T}) where{T}
 end
 
 """
-    Cosmology(Settings, CosmoPar,
-              ks, pk0, logk, dlogk,
-              zs, chi, z_of_chi, chi_max, chi_LSS, Dz, PkLz0, Pk)
+    Cosmology
 
 Base cosmology structure.  
 
 Arguments:
-- `Settings::MutableStructure` : cosmology constructure settings. 
-- `CosmoPar::Structure` : cosmological parameters.
-- `ks::Dual` : scales array.
-- `pk0::Dual`: primordial matter power spectrum.
-- `logk::Dual` : log scales array.
-- `dlogk::Dual` : increment in log scales.
-- `zs::Dual` : redshift array.
+- `settings::MutableStructure` : cosmology constructure settings. 
+- `cpar::MutableStructure` : cosmological parameters.
 - `chi::Dual` : comoving distance array.
 - `z_of_chi::Dual` : redshift of comoving distance array.
 - `chi_max::Dual` : upper bound of comoving distance array.
 - `chi_LSS::Dual` : comoving distance to suface of last scattering.
 - `Dz::Dual` : growth factor.
+- `fs8z::Dual` : fs8.
 - `PkLz0::Dual` : interpolator of log primordial power spectrum over k-scales.
 - `Pk::Dual` : matter power spectrum.
 
@@ -181,7 +175,6 @@ Returns:
 struct Cosmology
     settings::Settings
     cpar::CosmoPar
-    # Power spectrum
     chi::AbstractInterpolation
     z_of_chi::AbstractInterpolation
     chi_max
@@ -208,10 +201,6 @@ the primordial power spectrum is calculated using:
 - `tk_mode = "BBKS"` : the BBKS fitting formula (https://ui.adsabs.harvard.edu/abs/1986ApJ...304...15B)
 - `tk_mode = "EisHu"` : the Eisenstein & Hu formula (arXiv:astro-ph/9710252)
 - `tk_mode = "emulator"` : the Mootoovaloo et al 2021 emulator (arXiv:2105.02256v2)
-
-is `custom_Dz = nothing`, the growth factor is obtained either by solving the Jeans equation. \
-Otherwise, provided custom growth factor is used.
-
 
 Depending on the choice of power spectrum mode in the settings, \
 the matter power spectrum is either: 
@@ -268,7 +257,7 @@ Cosmology(cpar::CosmoPar, settings::Settings; kwargs...) = begin
 end
 
 """
-    Cosmology(Ωm, Ωb, h, n_s, σ8;
+    Cosmology(;Ωm, Ωb, h, n_s, σ8
               θCMB=2.725/2.7, nk=500, nz=500, nz_pk=100,
               tk_mode="BBKS", Pk_mode="linear", custom_Dz=nothing)
 
