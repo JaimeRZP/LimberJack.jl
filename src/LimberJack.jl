@@ -17,11 +17,12 @@ const CLIGHT_HMPC = 2997.92458
 
 include("core.jl")
 include("boltzmann.jl")
+include("data_utils.jl")
 include("growth.jl")
 include("halofit.jl")
 include("tracers.jl")
 include("spectra.jl")
 include("theory.jl")
-include("data_utils.jl")
+
 
 end
