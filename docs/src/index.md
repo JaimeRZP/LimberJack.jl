@@ -6,7 +6,7 @@
 
 ![](https://raw.githubusercontent.com/JaimeRZP/LimberJack.jl/main/docs/src/assets/LimberJack_logo.png)
 
-<p align="center"> A differentiable cosmological code in Julia. </p>
+A differentiable cosmological code in Julia. 
 
 ## Design Philosophy
 

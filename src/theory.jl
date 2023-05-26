@@ -58,14 +58,44 @@ function Theory(cosmology::Cosmology,
     return cls
 end
 
+"""
+    Theory(cosmology::Cosmology,
+           meta::Meta, files;
+           Nuisances=Dict())
+
+Composes a theory vector given a `Cosmology` object, \
+a `Meta` objectm, a `files` npz file and \
+a dictionary of nuisance parameters.
+
+Arguments:
+- `cosmology::Cosmology` : `Cosmology` object.
+- `meta::Meta` : `Meta` object.
+- `files` : `files` `npz` file.
+- `Nuisances::Dict` : dictonary of nuisace parameters. 
+
+Returns:
+- ```
+struct Meta
+    names : names of tracers.
+    pairs : pairs of tracers to compute angular spectra for.
+    types : types of the tracers.
+    idx : positions of cls in theory vector.
+    data : data vector.
+    cov : covariance of the data.
+    inv_cov : inverse covariance of the data.
+end
+```
+-files: npz file
+"""
+
 function Theory(cosmology::Cosmology,
-                instructions, files;
+                meta::Meta, files;
                 Nuisances=Dict())
     
-    names = instructions.names
-    types = instructions.types
-    pairs = instructions.pairs
-    idx = instructions.idx
+    names = meta.names
+    types = meta.types
+    pairs = meta.pairs
+    idx = meta.idx
     
     return Theory(cosmology::Cosmology,
                   names, types, pairs,

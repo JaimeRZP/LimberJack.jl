@@ -49,6 +49,34 @@ function _apply_scale_cuts(s, yaml_file)
     return s
 end
 
+
+"""
+    make_data(sacc_file, yaml_file)
+
+Process `sacc` and `yaml` files into a `Meta` structure \
+containing the instructions of how to compose the theory \
+vector and a `npz` file with the neccesary redshift distributions \
+of the tracers involved. 
+
+Arguments:
+- `sacc_file` : sacc file
+- `yaml_file` : yaml_file
+
+Returns:
+- ```
+struct Meta
+    names : names of tracers.
+    pairs : pairs of tracers to compute angular spectra for.
+    types : types of the tracers.
+    idx : positions of cls in theory vector.
+    data : data vector.
+    cov : covariance of the data.
+    inv_cov : inverse covariance of the data.
+end
+```
+-files: npz file
+"""
+
 function make_data(sacc_file, yaml_file; nzs_path="")
     #cut
     s = _apply_scale_cuts(sacc_file, yaml_file)

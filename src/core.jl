@@ -5,18 +5,18 @@ Constructor of settings structure constructor.
 
 Kwargs:
 
-- `nz::Int` : number of nodes in the general redshift array.
-- `nz_pk::Int` : number of nodes in the redshift array used to compute matter power spectrum grid.
-- `nz_t::Int` : number of nodes in the general redshift array.
-- `nk::Int`: number of nodes in the k-scale array used to compute matter power spectrum grid.
-- `nℓ::Int`: number of nodes in the multipoles array.
-- `using_As::Bool`: `True` if using the `As` parameter.
-- `cosmo_type::Type` : type of cosmological parameters. 
-- `tk_mode::String` : choice of transfer function.
-- `Dz_mode::String` : choice of method to compute the linear growth factor.
-- `Pk_mode::String` : choice of method to apply non-linear corrections to the matter power spectrum.
-- `custom_Dz::Any` : custom growth factor.
-- `emul_files` : emulator arrays. 
+- `nz::Int=300` : number of nodes in the general redshift array.
+- `nz_pk::Int=70` : number of nodes in the redshift array used to compute matter power spectrum grid.
+- `nz_t::Int=350` : number of nodes in the general redshift array.
+- `nk::Int=500`: number of nodes in the k-scale array used to compute matter power spectrum grid.
+- `nℓ::Int=300`: number of nodes in the multipoles array.
+- `using_As::Bool=false`: `True` if using the `As` parameter.
+- `cosmo_type::Type=Real` : type of cosmological parameters. 
+- `tk_mode::String="EisHu"` : choice of transfer function.
+- `Dz_mode::String="RK2"` : choice of method to compute the linear growth factor.
+- `Pk_mode::String="linear"` : choice of method to apply non-linear corrections to the matter power spectrum.
+- `custom_Dz::Any=nothing` : custom growth factor.
+- `emul_files=nothing` : emulator arrays. 
 
 Returns:
 ```
@@ -104,18 +104,18 @@ Cosmology parameters structure constructor.
 
 Kwargs:
 
-- `Ωm::Dual` : cosmological matter density. 
-- `Ωb::Dual` : cosmological baryonic density.
-- `h::Dual` : reduced Hubble parameter.
-- `ns::Dual` : Harrison-Zeldovich spectral index.
-- `As::Dual` : Harrison-Zeldovich spectral amplitude.
-- `σ8::Dual`: variance of the matter density field in a sphere of 8 Mpc.
-- `Y_p::Dual`: primordial helium fraction.
-- `N_ν::Dual`: effective number of relativisic species (PDG25 value).
-- `Σm_ν::Dual`: sum of neutrino masses (eV), Planck 15 default ΛCDM value.
-- `θCMB::Dual`: CMB temperature over 2.7.
-- `Ωg::Dual`: cosmological density of relativistic species.
-- `Ωr::Dual`: cosmological radiation density.
+- `Ωm::Dual=0.30` : cosmological matter density. 
+- `Ωb::Dual=0.05` : cosmological baryonic density.
+- `h::Dual=0.70` : reduced Hubble parameter.
+- `ns::Dual=0.96` : Harrison-Zeldovich spectral index.
+- `As::Dual=2.097e-9` : Harrison-Zeldovich spectral amplitude.
+- `σ8::Dual=0.81`: variance of the matter density field in a sphere of 8 Mpc.
+- `Y_p::Dual=0.24`: primordial helium fraction.
+- `N_ν::Dual=3.046`: effective number of relativisic species (PDG25 value).
+- `Σm_ν::Dual=0.0`: sum of neutrino masses (eV), Planck 15 default ΛCDM value.
+- `θCMB::Dual=2.725/2.7`: CMB temperature over 2.7.
+- `Ωg::Dual=2.38163816E-5*θCMB^4/h^2`: cosmological density of relativistic species.
+- `Ωr::Dual=Ωg*(1.0 + N_ν * (7.0/8.0) * (4.0/11.0)^(4.0/3.0))`: cosmological radiation density.
 
 Returns:
 
@@ -212,9 +212,9 @@ expansion history.
 
 Depending on the choice of transfer function in the settings, \
 the primordial power spectrum is calculated using: 
-- `tk_mode = "BBKS"` : the BBKS fitting formula (https://ui.adsabs.harvard.edu/abs/1986ApJ...304...15B)
 - `tk_mode = "EisHu"` : the Eisenstein & Hu formula (arXiv:astro-ph/9710252)
-- `tk_mode = "emulator"` : the Mootoovaloo et al 2021 emulator (arXiv:2105.02256v2)
+- `tk_mode = "emulator"` : the Mootoovaloo et al 2021 emulator `EmuPk` (arXiv:2105.02256v2)
+- `tk_mode = "Bolt"` : the full differentiable Boltzmann code `Bolt.jl` 
 
 Depending on the choice of power spectrum mode in the settings, \
 the matter power spectrum is either: 
@@ -227,8 +227,20 @@ Arguments:
 
 Returns:
 
-- `Cosmology` : cosmology structure.
-
+```
+mutable struct Cosmology
+    settings::Settings
+    cpar::CosmoPar
+    chi::AbstractInterpolation
+    z_of_chi::AbstractInterpolation
+    chi_max
+    chi_LSS
+    Dz::AbstractInterpolation
+    fs8z::AbstractInterpolation
+    PkLz0::AbstractInterpolation
+    Pk::AbstractInterpolation
+end     
+``` 
 """
 Cosmology(cpar::CosmoPar, settings::Settings; kwargs...) = begin
     # Load settings
@@ -271,31 +283,10 @@ Cosmology(cpar::CosmoPar, settings::Settings; kwargs...) = begin
 end
 
 """
-    Cosmology(;Ωm, Ωb, h, n_s, σ8
-              θCMB=2.725/2.7, nk=500, nz=500, nz_pk=100,
-              tk_mode="BBKS", Pk_mode="linear", custom_Dz=nothing)
+    Cosmology(;kwargs...)
 
-Simple cosmology structure constructor that calls the base constructure.
-Fills the `CosmoPar` and `Settings` structure based on the given parameters.
-
-Arguments:
-
-- `Ωm::Dual` : cosmological matter density. 
-- `Ωb::Dual` : cosmological baryonic density.
-- `h::Dual` : reduced Hubble parameter.
-- `n_s::Dual` : spectral index.
-- `σ8::Dual`: variance of the matter density field in a sphere of 8 Mpc.
-
-Kwargs:
-
-- `θCMB::Dual` : CMB temperature.
-- `nz::Int` : number of nodes in the general redshift array.
-- `nz_pk::Int` : number of nodes in the redshift array used for matter power spectrum.
-- `nk::Int`: number of nodes in the matter power spectrum.
-- `tk_mode::String` : choice of transfer function.
-- `Pk_mode::String` : choice of matter power spectrum.
-- `custom_Dz::Any` : custom growth factor.
-
+Short form to call `Cosmology(cpar::CosmoPar, settings::Settings)`.
+`kwargs` are passed to the constructors of `CosmoPar` and `Settings`.
 Returns:
 
 - `Cosmology` : cosmology structure.
