@@ -1,4 +1,4 @@
-struct Meta
+struct Instructions
     names
     pairs
     types
@@ -64,7 +64,7 @@ Arguments:
 
 Returns:
 - ```
-struct Meta
+struct Instructions
     names : names of tracers.
     pairs : pairs of tracers to compute angular spectra for.
     types : types of the tracers.
@@ -111,8 +111,8 @@ function make_data(sacc_file, yaml_file; nzs_path="")
     types = [_get_type(s, name) for name in names]
     
     # build struct
-    meta = Meta(names, pairs, types, idx,
-                cls, cov, inv_cov)
+    instructions = Instructions(names, pairs, types, idx,
+                                cls, cov, inv_cov)
     
     # Initialize
     files = Dict{String}{Vector}()
@@ -141,5 +141,5 @@ function make_data(sacc_file, yaml_file; nzs_path="")
         end
     end
     
-    return meta, files
+    return instructions, files
 end 

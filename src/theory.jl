@@ -60,7 +60,7 @@ end
 
 """
     Theory(cosmology::Cosmology,
-           meta::Meta, files;
+           instructions::Instructions, files;
            Nuisances=Dict())
 
 Composes a theory vector given a `Cosmology` object, \
@@ -89,13 +89,13 @@ end
 """
 
 function Theory(cosmology::Cosmology,
-                meta::Meta, files;
+                instructions::Instructions, files;
                 Nuisances=Dict())
     
-    names = meta.names
-    types = meta.types
-    pairs = meta.pairs
-    idx = meta.idx
+    names = instructions.names
+    types = instructions.types
+    pairs = instructions.pairs
+    idx = instructions.idx
     
     return Theory(cosmology::Cosmology,
                   names, types, pairs,
