@@ -1,0 +1,6 @@
+[emupk]
+git-tree-sha1 = "32d324fc249050547e8b5198afccb437d55a0e26"
+
+    [[emupk.download]]
+    sha256 = "182fb713c21d20439ce644745e18ea65f57860b78be3410e93aedcfceab68b92"
+    url = "https://gist.github.com/JaimeRZP/554b7044fb9ebe42e54ed494e8ee1196/raw/32d324fc249050547e8b5198afccb437d55a0e26.tar.gz"

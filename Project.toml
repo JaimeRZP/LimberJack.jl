@@ -4,6 +4,7 @@ authors = ["Jaime Ruiz-Zapatero <jaimerz011235812@gmail.com>", "David Alonso <da
 version = "0.1.0"
 
 [deps]
+Artifacts = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
 BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
 Bolt = "d94d39b4-3f51-4e5a-bfd8-f3b08e8f2b62"
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
