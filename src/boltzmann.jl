@@ -70,16 +70,16 @@ struct Emulator
     std_log_Pks
 end
 
-Emulator() = begin
-    trans_cosmos = emupk["trans_cosmos"]
-    karr = emupk["training_karr"]
+Emulator(files) = begin
+    trans_cosmos = files["trans_cosmos"]
+    karr = files["training_karr"]
     training_karr = range(log(karr[1]), stop=log(karr[end]), length=length(karr))
-    hypers = emupk["hypers"]
-    alphas = emupk["alphas"]
-    inv_chol_cosmos = emupk["inv_chol_cosmos"]
-    mean_cosmos = emupk["mean_cosmos"]
-    mean_log_Pks = emupk["mean_log_Pks"]
-    std_log_Pks = emupk["std_log_Pks"]
+    hypers = files["hypers"]
+    alphas = files["alphas"]
+    inv_chol_cosmos = files["inv_chol_cosmos"]
+    mean_cosmos = files["mean_cosmos"]
+    mean_log_Pks = files["mean_log_Pks"]
+    std_log_Pks = files["std_log_Pks"]
     #Note: transpose python arrays
     Emulator(alphas, hypers, 
              trans_cosmos', training_karr,
@@ -114,7 +114,6 @@ function _get_kernel(arr1, arr2, hyper)
 end
 
 function get_emulated_log_pk0(cpar::CosmoPar, settings::Settings)
-    emulator = Emulator()
     cosmotype = settings.cosmo_type
     wc = cpar.Ωc*cpar.h^2
     wb = cpar.Ωb*cpar.h^2
@@ -134,14 +133,14 @@ end
 
 function get_Bolt_pk0(cpar::CosmoPar, settings::Settings)
     𝕡 = Bolt.CosmoParams(h = cpar.h,
-                    Ω_r = cpar.Ωg,
-                    Ω_b = cpar.Ωb,
-                    Ω_c = cpar.Ωc,
-                    A = cpar.As,
-                    n = cpar.ns,
-                    Y_p = cpar.Y_p,
-                    N_ν = cpar.N_ν,
-                    Σm_ν = cpar.Σm_ν)
+        Ω_r = cpar.Ωg,
+        Ω_b = cpar.Ωb,
+        Ω_c = cpar.Ωc,
+        A = cpar.As,
+        n = cpar.ns,
+        Y_p = cpar.Y_p,
+        N_ν = cpar.N_ν,
+        Σm_ν = cpar.Σm_ν)
     bg = Background(𝕡)
     𝕣 = Bolt.RECFAST(bg=bg, Yp=𝕡.Y_p, OmegaB=𝕡.Ω_b,OmegaG=𝕡.Ω_r)
     ih = IonizationHistory(𝕣, 𝕡, bg)

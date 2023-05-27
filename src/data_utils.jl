@@ -63,7 +63,7 @@ Arguments:
 - `yaml_file` : yaml_file
 
 Returns:
-- ```
+```
 struct Instructions
     names : names of tracers.
     pairs : pairs of tracers to compute angular spectra for.

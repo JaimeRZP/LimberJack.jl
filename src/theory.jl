@@ -74,7 +74,8 @@ Arguments:
 - `Nuisances::Dict` : dictonary of nuisace parameters. 
 
 Returns:
-- ```
+- Meta: structure
+```
 struct Meta
     names : names of tracers.
     pairs : pairs of tracers to compute angular spectra for.
@@ -85,7 +86,7 @@ struct Meta
     inv_cov : inverse covariance of the data.
 end
 ```
--files: npz file
+- files: npz file
 """
 function Theory(cosmology::Cosmology,
                 instructions::Instructions, files;
