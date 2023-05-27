@@ -65,7 +65,7 @@ cosmo_Bolt_nonlin = Cosmology(Ωm=0.27, Ωb=0.046, h=0.70, ns=1.0, σ8=0.81,
     end
 
     @testset "linear_Pk_σ8" begin
-        ks = LimberJack.emulator.training_karr
+        ks = exp.(LimberJack.emulator.training_karr)
         pk_EisHu = nonlin_Pk(cosmo_EisHu, ks, 0.0)
         pk_emul = nonlin_Pk(cosmo_emul, ks, 0.0)
         pk_EisHu_bm = test_results["pk_EisHu"]
@@ -83,7 +83,7 @@ cosmo_Bolt_nonlin = Cosmology(Ωm=0.27, Ωb=0.046, h=0.70, ns=1.0, σ8=0.81,
                                     emul_files=emulator)
             cosmo_Bolt_As = Cosmology(Ωm=0.27, Ωb=0.046, h=0.7, ns=1.0, As=2.097e-9,
                                      nk=70, nz=300, nz_pk=70, tk_mode="Bolt")
-            ks = LimberJack.emulator.training_karr
+            ks = exp.(LimberJack.emulator.training_karr)
             pk_emul = nonlin_Pk(cosmo_emul_As, ks, 0.0)
             pk_Bolt = nonlin_Pk(cosmo_Bolt_As, ks, 0.0)
             pk_emul_bm = test_results["pk_emul_As"]
@@ -96,7 +96,7 @@ cosmo_Bolt_nonlin = Cosmology(Ωm=0.27, Ωb=0.046, h=0.70, ns=1.0, σ8=0.81,
     end                 
 
     @testset "nonlinear_Pk" begin
-        ks = LimberJack.emulator.training_karr
+        ks = exp.(LimberJack.emulator.training_karr)
         pk_EisHu = nonlin_Pk(cosmo_EisHu_nonlin, ks, 0)
         pk_emul = nonlin_Pk(cosmo_emul_nonlin, ks, 0)
         pk_Bolt = nonlin_Pk(cosmo_Bolt_nonlin, ks, 0)
@@ -332,7 +332,7 @@ cosmo_Bolt_nonlin = Cosmology(Ωm=0.27, Ωb=0.046, h=0.70, ns=1.0, σ8=0.81,
             logk = range(log(0.0001), stop=log(100.0), length=500)
             ks = exp.(logk)
         else
-            ks = LimberJack.emulator.training_karr
+            ks = exp.(LimberJack.emulator.training_karr)
         end
 
         function lin_EisHu(p)
@@ -397,7 +397,7 @@ cosmo_Bolt_nonlin = Cosmology(Ωm=0.27, Ωb=0.046, h=0.70, ns=1.0, σ8=0.81,
             logk = range(log(0.0001), stop=log(100.0), length=500)
             ks = exp.(logk)
         else
-            ks = LimberJack.emulator.training_karr
+            ks = exp.(LimberJack.emulator.training_karr)
         end
 
                                                 
