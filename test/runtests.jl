@@ -13,19 +13,16 @@ test_results = npzread("test_results.npz")
 test_cls = npzread("test_cls.npz")["cls"]
 test_cls_files = npzread("test_cls_files.npz")
 test_output = Dict{String}{Vector}()
-emulator = npzread("../emulator/files.npz")
 
 cosmo_EisHu = Cosmology(nk=300, nz=300, nz_pk=70, tk_mode="EisHu")
 cosmo_emul = Cosmology(Ωm=(0.12+0.022)/0.75^2, Ωb=0.022/0.75^2, h=0.75, ns=1.0, σ8=0.81,
-                       nk=300, nz=300, nz_pk=70, tk_mode="emulator", 
-                       emul_files=emulator)
+                       nk=300, nz=300, nz_pk=70, tk_mode="emupk")
 
 cosmo_EisHu_nonlin = Cosmology(nk=300, nz=300, nz_pk=70,
                                tk_mode="EisHu", Pk_mode="Halofit")
 cosmo_emul_nonlin = Cosmology(Ωm=(0.12+0.022)/0.75^2, Ωb=0.022/0.75^2, h=0.75, ns=1.0, σ8=0.81,
                               nk=300, nz=300, nz_pk=70,
-                              tk_mode="emulator", Pk_mode="Halofit",
-                              emul_files=emulator)
+                              tk_mode="emupk", Pk_mode="Halofit")
 cosmo_Bolt_nonlin = Cosmology(Ωm=0.27, Ωb=0.046, h=0.70, ns=1.0, σ8=0.81,
                               nk=70, nz=300, nz_pk=70,
                               tk_mode="Bolt", Pk_mode="Halofit")
