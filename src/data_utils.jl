@@ -76,7 +76,6 @@ end
 ```
 -files: npz file
 """
-
 function make_data(sacc_file, yaml_file; nzs_path="")
     #cut
     s = _apply_scale_cuts(sacc_file, yaml_file)

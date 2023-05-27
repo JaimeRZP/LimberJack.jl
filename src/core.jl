@@ -41,7 +41,6 @@ mutable struct Settings
     tk_mode::String
     Dz_mode::String
     Pk_mode::String
-    emul_files
 end        
 ``` 
 """
@@ -66,7 +65,6 @@ mutable struct Settings
     tk_mode::String
     Dz_mode::String
     Pk_mode::String
-    emul_files
 end
 
 Settings(;kwargs...) = begin
@@ -90,11 +88,10 @@ Settings(;kwargs...) = begin
     tk_mode = get(kwargs, :tk_mode, "EisHu")
     Dz_mode = get(kwargs, :Dz_mode, "RK2")
     Pk_mode = get(kwargs, :Pk_mode, "linear")
-    emul_files = get(kwargs, :emul_files, nothing)
     Settings(nz, nz_pk, nz_t, nk, nℓ,
              zs, zs_pk, zs_t, ks, ℓs, logk,  dlogk,
              using_As,
-             cosmo_type, tk_mode, Dz_mode, Pk_mode, emul_files)
+             cosmo_type, tk_mode, Dz_mode, Pk_mode)
 end
 
 """
@@ -213,7 +210,7 @@ expansion history.
 Depending on the choice of transfer function in the settings, \
 the primordial power spectrum is calculated using: 
 - `tk_mode = "EisHu"` : the Eisenstein & Hu formula (arXiv:astro-ph/9710252)
-- `tk_mode = "emulator"` : the Mootoovaloo et al 2021 emulator `EmuPk` (arXiv:2105.02256v2)
+- `tk_mode = "emupk"` : the Mootoovaloo et al 2021 emulator `EmuPk` (arXiv:2105.02256v2)
 - `tk_mode = "Bolt"` : the full differentiable Boltzmann code `Bolt.jl` 
 
 Depending on the choice of power spectrum mode in the settings, \

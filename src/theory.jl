@@ -87,7 +87,6 @@ end
 ```
 -files: npz file
 """
-
 function Theory(cosmology::Cosmology,
                 instructions::Instructions, files;
                 Nuisances=Dict())

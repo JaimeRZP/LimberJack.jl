@@ -59,44 +59,16 @@ function TkEisHu(cosmo::CosmoPar, k)
     return Tk.^2
 end
 
-struct Emulator
-    alphas
-    hypers
-    trans_cosmos
-    training_karr
-    inv_chol_cosmos
-    mean_cosmos
-    mean_log_Pks
-    std_log_Pks
+function _x_transformation(inv_chol_cosmos, mean_cosmos, point)
+    return inv_chol_cosmos * (point .- mean_cosmos)'
 end
 
-Emulator(files) = begin
-    trans_cosmos = files["trans_cosmos"]
-    karr = files["training_karr"]
-    training_karr = range(log(karr[1]), stop=log(karr[end]), length=length(karr))
-    hypers = files["hypers"]
-    alphas = files["alphas"]
-    inv_chol_cosmos = files["inv_chol_cosmos"]
-    mean_cosmos = files["mean_cosmos"]
-    mean_log_Pks = files["mean_log_Pks"]
-    std_log_Pks = files["std_log_Pks"]
-    #Note: transpose python arrays
-    Emulator(alphas, hypers, 
-             trans_cosmos', training_karr,
-             inv_chol_cosmos, mean_cosmos,
-             mean_log_Pks, std_log_Pks)
+function _y_transformation(mean_log_Pks, std_log_Pks, point)
+    return ((point .- mean_log_Pks) ./ std_log_Pks)'
 end
 
-function _x_transformation(emulator::Emulator, point)
-    return emulator.inv_chol_cosmos * (point .- emulator.mean_cosmos)'
-end
-
-function _y_transformation(emulator::Emulator, point)
-    return ((point .- emulator.mean_log_Pks) ./ emulator.std_log_Pks)'
-end
-
-function _inv_y_transformation(emulator::Emulator, point)
-    return exp.(emulator.std_log_Pks .* point .+ emulator.mean_log_Pks)
+function _inv_y_transformation(std_log_Pks, mean_log_Pks, point)
+    return exp.(std_log_Pks .* point .+ mean_log_Pks)
 end
 
 function _get_kernel(arr1, arr2, hyper)
@@ -114,22 +86,25 @@ function _get_kernel(arr1, arr2, hyper)
 end
 
 function get_emulated_log_pk0(cpar::CosmoPar, settings::Settings)
-    emulator = Emulator(settings.emul_files)
     cosmotype = settings.cosmo_type
     wc = cpar.Ωc*cpar.h^2
     wb = cpar.Ωb*cpar.h^2
     ln1010As = log((10^10)*cpar.As)
     params = [wc, wb, ln1010As, cpar.ns, cpar.h]
-    params_t = _x_transformation(emulator, params')
+    params_t = _x_transformation(emupk["inv_chol_cosmos"],
+                                 emupk["mean_cosmos"],
+                                 params')
     
-    nk = length(emulator.training_karr)
+    nk = length(emupk["training_karr"])
     pk0s_t = zeros(cosmotype, nk)
     @inbounds for i in 1:nk
-        kernel = _get_kernel(emulator.trans_cosmos, params_t, emulator.hypers[i, :])
-        pk0s_t[i] = dot(vec(kernel), vec(emulator.alphas[i,:]))
+        kernel = _get_kernel(emupk["trans_cosmos"], params_t, emupk["hypers"][i, :])
+        pk0s_t[i] = dot(vec(kernel), vec(emupk["alphas"][i,:]))
     end
-    pk0s = vec(_inv_y_transformation(emulator, pk0s_t))
-    return emulator.training_karr, pk0s
+    pk0s = vec(_inv_y_transformation(emupk["std_log_Pks"],
+                                     emupk["mean_log_Pks"],
+                                     pk0s_t))
+    return emupk["training_karr"], pk0s
 end
 
 function get_Bolt_pk0(cpar::CosmoPar, settings::Settings)
@@ -179,7 +154,7 @@ function σR2(cosmo::Cosmology, R)
 end
 
 function lin_Pk0(cpar::CosmoPar, settings::Settings)
-    if settings.tk_mode == "emulator"
+    if settings.tk_mode == "emupk"
         lks_emul, pk0_emul = get_emulated_log_pk0(cpar, settings)
         pki_emul = cubic_spline_interpolation(lks_emul, log.(pk0_emul),
                                               extrapolation_bc=Line())
