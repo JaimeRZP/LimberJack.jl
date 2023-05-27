@@ -79,8 +79,7 @@ cosmo_Bolt_nonlin = Cosmology(Ωm=0.27, Ωb=0.046, h=0.70, ns=1.0, σ8=0.81,
     if extensive
         @testset "linear_Pk_As" begin
             cosmo_emul_As = Cosmology(Ωm=0.27, Ωb=0.046, h=0.7, ns=1.0, As=2.097e-9,
-                                    nk=300, nz=300, nz_pk=70, tk_mode="emulator",
-                                    emul_files=emulator)
+                                    nk=300, nz=300, nz_pk=70, tk_mode="emulator")
             cosmo_Bolt_As = Cosmology(Ωm=0.27, Ωb=0.046, h=0.7, ns=1.0, As=2.097e-9,
                                      nk=70, nz=300, nz_pk=70, tk_mode="Bolt")
             ks = exp.(LimberJack.emulator.training_karr)
