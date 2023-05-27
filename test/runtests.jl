@@ -79,7 +79,7 @@ cosmo_Bolt_nonlin = Cosmology(Ωm=0.27, Ωb=0.046, h=0.70, ns=1.0, σ8=0.81,
     if extensive
         @testset "linear_Pk_As" begin
             cosmo_emul_As = Cosmology(Ωm=0.27, Ωb=0.046, h=0.7, ns=1.0, As=2.097e-9,
-                                    nk=300, nz=300, nz_pk=70, tk_mode="emulator")
+                                    nk=300, nz=300, nz_pk=70, tk_mode="emupk")
             cosmo_Bolt_As = Cosmology(Ωm=0.27, Ωb=0.046, h=0.7, ns=1.0, As=2.097e-9,
                                      nk=70, nz=300, nz_pk=70, tk_mode="Bolt")
             ks = exp.(LimberJack.emulator.training_karr)
@@ -341,8 +341,7 @@ cosmo_Bolt_nonlin = Cosmology(Ωm=0.27, Ωb=0.046, h=0.70, ns=1.0, σ8=0.81,
         end
 
         function lin_emul(p)
-            cosmo = Cosmology(Ωm=p, tk_mode="emulator", Pk_mode="linear",
-                              emul_files=emulator)
+            cosmo = Cosmology(Ωm=p, tk_mode="emupk", Pk_mode="linear")
             pk = lin_Pk(cosmo, ks, 0.)
             return pk
         end
@@ -408,7 +407,7 @@ cosmo_Bolt_nonlin = Cosmology(Ωm=0.27, Ωb=0.046, h=0.70, ns=1.0, σ8=0.81,
 
         #=
         function nonlin_emul(p)
-            cosmo = Cosmology(Ωm=p, tk_mode="emulator", Pk_mode="Halofit")
+            cosmo = Cosmology(Ωm=p, tk_mode="emupk", Pk_mode="Halofit")
             pk = nonlin_Pk(cosmo, ks, 0.)
             return pk
         end
