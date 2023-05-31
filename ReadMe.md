@@ -46,23 +46,13 @@ Once you have installed ```Julia``` you can install ```LimberJack.jl``` followin
     using Pkg
     Pkg.add(path=".")
 ```
-#### Known issues
-
-Sometimes an older version of ```Interpolations``` is installed resulting in ```cubic_spline_interpolation``` is not defined.
-If this happens, run the following commands from ```LimberJack``` repository folder:
+### Installing Sacc.py in Julia
 
 ``` julia
     using Pkg
-    Pkg.activate(".")
-    Pkg.update("LimberJack")
-    Pkg.resolve()
-    Pkg.activate()
-    Pkg.add("Interpolations")
-    Pkg.update("Interpolations")
-    Pkg.develop(path=".")
+    Pkg.add("CondaPkg")
+    CondaPkg.add("sacc")
 ```
-This essentially updates the ```Interpolations``` installations inside and outside the ```LimberJack``` environment.
-
 
 ## Use
 
