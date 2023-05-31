@@ -33,14 +33,11 @@ x = range(0., stop=3., length=N)
     x=x)
 
     #KiDS priors
-    wc ~ Uniform(0.06, 0.40)
-    wb ~ Uniform(0.019, 0.026)
-    h ~ Uniform(0.64, 0.82)
+    Ωm ~ Uniform(0.2, 0.6)
+    Ωb ~ Uniform(0.028, 0.065)
+    h ~ Truncated(Normal(0.72, 0.05), 0.64, 0.82)
     ns ~ Uniform(0.84, 1.1)
     s8 = 0.811
-
-    Ωm = (wc + wb)/h^2
-    Ωb = wb/h^2
     
     DESgc__0_b = 1.48 #~ Uniform(0.8, 3.0)
     DESgc__1_b = 1.81 #~ Uniform(0.8, 3.0)
@@ -94,7 +91,6 @@ x = range(0., stop=3., length=N)
                      "eBOSS__0_b" => eBOSS__0_b,
                      "eBOSS__1_b" => eBOSS__1_b)
 
-
     eta = 0.2
     l = 0.3
     latent_N = length(latent_x)
@@ -104,21 +100,20 @@ x = range(0., stop=3., length=N)
     K = sqexp_cov_fn(latent_x; eta=eta, l=l)
     latent_gp = latent_GP(mu, v, K)
     gp = conditional(latent_x, x, latent_gp, sqexp_cov_fn;
-                      eta=1.0, l=l)
+                     eta=1.0, l=l)
     
     cosmology = Cosmology(Ωm, Ωb, h, ns, s8,
-                          tk_mode="emulator",
+                          tk_mode="EisHu",
                           Pk_mode="Halofit", 
-                          custom_Dz=[x, gp],
-                          emul_path="../../emulator/files.npz")
+                          custom_Dz=[x, gp])
     
     theory = Theory(cosmology, meta, files; Nuisances=nuisances)
     
     data ~ MvNormal(theory, cov)
 end;
 
-iterations = 500
-adaptation = 500
+iterations = 100
+adaptation = 300
 TAP = 0.65
 init_ϵ = 0.005
 
@@ -129,7 +124,7 @@ println("adaptation ", adaptation)
 
 # Start sampling.
 folpath = "../../chains/NUTS/18_runs/"
-folname = string("ND_super_gp_TAP_", TAP)
+folname = string("ND_super_gp_EisHu_Gibbs_TAP_", TAP)
 folname = joinpath(folpath, folname)
 
 if isdir(folname)
@@ -154,7 +149,8 @@ CSV.write(joinpath(folname, string("chain_", last_n+1,".csv")), Dict("samples"=>
 
 # Sample
 cond_model = model(data)
-sampler = NUTS(adaptation, TAP; init_ϵ=init_ϵ)
+sampler = Gibbs(NUTS(adaptation, TAP, :Ωm, :Ωb, :h, :ns; init_ϵ=init_ϵ),
+                NUTS(adaptation, TAP, :v; init_ϵ=init_ϵ))
 chain = sample(cond_model, sampler, iterations;
                 progress=true, save_state=true)
 
