@@ -5,7 +5,7 @@ using NPZ
 using Statistics
 
 test_main=true
-if extensive
+if test_main
     println("testing main functions")
 end  
 test_Bolt = false
