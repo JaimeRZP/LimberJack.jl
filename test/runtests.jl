@@ -17,10 +17,10 @@ if extensive
     println("extensive")
 end 
 
-if test_main
-    test_results = npzread("test_results.npz")
-    test_output = Dict{String}{Vector}()
+test_results = npzread("test_results.npz")
+test_output = Dict{String}{Vector}()
 
+if test_main
     cosmo_EisHu = Cosmology(nk=300, nz=300, nz_pk=70, tk_mode="EisHu")
     cosmo_emul = Cosmology(Ωm=(0.12+0.022)/0.75^2, Ωb=0.022/0.75^2, h=0.75, ns=1.0, σ8=0.81,
                         nk=300, nz=300, nz_pk=70, tk_mode="emupk")
@@ -572,7 +572,11 @@ if test_main
             @test all(@. (abs(IA_A_autodiff/IA_A_anal-1) < 0.05))
             @test all(@. (abs(IA_alpha_autodiff/IA_alpha_anal-1) < 0.05))
         end
-        npzwrite("test_output.npz", test_output)
+        if extensive
+            npzwrite("test_extensive_output.npz", test_output)
+        else    
+            npzwrite("test_output.npz", test_output)
+        end    
     end
 end  
 
@@ -604,31 +608,39 @@ if test_Bolt
             
         end
 
-        if extensive
-            @testset "IsBoltPkDiff" begin
+       
+        @testset "IsBoltPkDiff" begin
+            if extensive
+                logk = range(log(0.0001), stop=log(100.0), length=100)
+                ks = exp.(logk)
+            else
                 logk = range(log(0.0001), stop=log(100.0), length=20)
                 ks = exp.(logk)
+            end     
 
-                function lin_Bolt(p)
-                    cosmo = Cosmology(Ωm=p, tk_mode="Bolt", Pk_mode="linear")
-                    pk = lin_Pk(cosmo, ks, 0.)
-                    return pk
-                end
-
-                Ωm0 = 0.25
-                dΩm = 0.01
-
-                lin_Bolt_autodiff = abs.(ForwardDiff.derivative(lin_Bolt, Ωm0))
-                lin_Bolt_num = abs.((lin_Bolt(Ωm0+dΩm)-lin_Bolt(Ωm0-dΩm))/(2dΩm))
-
-                merge!(Bolt_test_output, Dict("lin_Bolt_autodiff"=> lin_Bolt_autodiff))
-                merge!(Bolt_test_output, Dict("lin_Bolt_num"=> lin_Bolt_num))        
-                # Median needed since errors shoot up when derivatieve
-                # crosses zero
-                @test median(lin_Bolt_autodiff./lin_Bolt_num.-1) < 0.05
+            function lin_Bolt(p)
+                cosmo = Cosmology(Ωm=p, tk_mode="Bolt", Pk_mode="linear")
+                pk = lin_Pk(cosmo, ks, 0.)
+                return pk
             end
-        end    
-        npzwrite("Bolt_test_output.npz", Bolt_test_output)
+
+            Ωm0 = 0.25
+            dΩm = 0.01
+
+            lin_Bolt_autodiff = abs.(ForwardDiff.derivative(lin_Bolt, Ωm0))
+            lin_Bolt_num = abs.((lin_Bolt(Ωm0+dΩm)-lin_Bolt(Ωm0-dΩm))/(2dΩm))
+
+            merge!(Bolt_test_output, Dict("lin_Bolt_autodiff"=> lin_Bolt_autodiff))
+            merge!(Bolt_test_output, Dict("lin_Bolt_num"=> lin_Bolt_num))        
+            # Median needed since errors shoot up when derivatieve
+            # crosses zero
+            @test median(lin_Bolt_autodiff./lin_Bolt_num.-1) < 0.05
+        end
+        if extensive
+            npzwrite("Bolt_test_extensive_output.npz", Bolt_test_output)
+        else
+            npzwrite("Bolt_test_extensive_output.npz", Bolt_test_output)
+        end      
     end
 end    
 

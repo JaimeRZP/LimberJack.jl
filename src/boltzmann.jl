@@ -142,7 +142,7 @@ function get_Bolt_pk0(cpar::CosmoPar, settings::Settings)
         N_ν = cpar.N_ν,
         Σm_ν = cpar.Σm_ν)
     bg = Background(𝕡)
-    𝕣 = Bolt.RECFAST(bg=bg, Yp=𝕡.Y_p, OmegaB=𝕡.Ω_b,OmegaG=𝕡.Ω_r)
+    𝕣 = Bolt.RECFAST(bg; Yp=𝕡.Y_p, OmegaB=𝕡.Ω_b,OmegaG=𝕡.Ω_r)
     ih = IonizationHistory(𝕣, 𝕡, bg)
     # bg.H₀ = 0.00023349 [1/Mpc] 
     kmin,kmax,nk = 0.5*0.00023349,30000*0.00023349,settings.nk 
