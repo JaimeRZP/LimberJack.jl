@@ -28,7 +28,11 @@ cov = zeros(Float64, length(fs8_data)+length(cls_data), length(fs8_data)+length(
 cov[1:length(fs8_data), 1:length(fs8_data)] = fs8_cov
 cov[length(fs8_data)+1:(length(fs8_data)+length(cls_data)),
     length(fs8_data)+1:(length(fs8_data)+length(cls_data))] = cls_cov
-data = [fs8_data ; cls_data];
+data = [fs8_data; cls_data];
+
+errs = sqrt.(diag(cov))
+data = data ./ errs
+cov = Hermitian(cov ./ (errs * errs')) 
 
 fid_cosmo = Cosmology()
 n = 101
@@ -124,12 +128,12 @@ x = range(0., stop=3., length=N)
     fs8s = fs8(cosmology, fs8_zs)
     theory = [fs8s; cls]
     
-    data ~ MvNormal(theory, cov)
+    data ~ MvNormal(theory ./ errs, cov)
 end;
 
 iterations = 100
 adaptation = 300
-TAP = 0.65
+TAP = 0.60
 init_ϵ = 0.005
 
 println("sampling settings: ")
@@ -164,8 +168,8 @@ CSV.write(joinpath(folname, string("chain_", last_n+1,".csv")), Dict("samples"=>
 
 # Sample
 cond_model = model(data)
-sampler = Gibbs(NUTS(adaptation, TAP, :Ωm, :Ωb, :h, :ns),
-                NUTS(adaptation, TAP, :v))
+sampler = Gibbs(NUTS(adaptation, TAP, :Ωm, :Ωb, :h, :ns; init_ϵ=init_ϵ),
+                NUTS(adaptation, TAP, :v; init_ϵ=init_ϵ))
 chain = sample(cond_model, sampler, iterations;
                 progress=true, save_state=true)
 

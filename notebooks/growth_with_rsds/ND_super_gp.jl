@@ -19,6 +19,10 @@ meta, files = make_data(sacc_file, yaml_file)
 data = meta.data
 cov = meta.cov
 
+errs = sqrt.(diag(cov))
+data = data ./ errs
+cov = Hermitian(cov ./ (errs * errs')) 
+
 fid_cosmo = Cosmology()
 n = 101
 N = 201
@@ -109,12 +113,12 @@ x = range(0., stop=3., length=N)
     
     theory = Theory(cosmology, meta, files; Nuisances=nuisances)
     
-    data ~ MvNormal(theory, cov)
+    data ~ MvNormal(theory ./ errs, cov)
 end;
 
 iterations = 100
 adaptation = 300
-TAP = 0.65
+TAP = 0.60
 init_ϵ = 0.005
 
 println("sampling settings: ")

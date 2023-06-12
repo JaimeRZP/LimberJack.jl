@@ -6,7 +6,6 @@ test_output = Dict{String}{Vector}()
 logk = range(log(0.0001), stop=log(100.0), length=100)
 ks = exp.(logk)
 
-ks = npzread("../emulator/files.npz")["training_karr"]
 cosmo_Bolt_As = Cosmology(Ωm=0.27, Ωb=0.046, h=0.7, ns=1.0, As=2.097e-9,
                           nk=70, nz=300, nz_pk=70, tk_mode="Bolt")
 pk_Bolt = nonlin_Pk(cosmo_Bolt_As, ks, 0.0)
