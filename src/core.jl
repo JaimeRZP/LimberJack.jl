@@ -77,8 +77,8 @@ Settings(;kwargs...) = begin
     zs_pk = range(0., stop=3.0, length=nz_pk)
     zs = range(0.0, stop=3.0, length=nz)
     zs_t = range(0.00001, stop=3.0, length=nz_t)
-    logk = LinRange(-4, 2, nk)
-    ks = 10 .^ logk
+    logk = range(log(0.0001), stop=log(100.0), length=nk)
+    ks = exp.(logk)
     dlogk = log(ks[2]/ks[1])
     ℓs = range(0, stop=2000, length=nℓ)
 
