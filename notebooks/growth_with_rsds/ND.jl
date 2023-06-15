@@ -4,6 +4,7 @@ using LimberJack
 using GaussianProcess
 using CSV
 using NPZ
+using JDL2
 using YAML
 using PythonCall
 sacc = pyimport("sacc");
@@ -109,7 +110,7 @@ println("adaptation ", adaptation)
 
 # Start sampling.
 folpath = "../../chains/NUTS/18_runs/"
-folname = string("ND_TAP", TAP)
+folname = string("ND_TAP_", TAP)
 folname = joinpath(folpath, folname)
 
 if isdir(folname)
@@ -139,6 +140,6 @@ chain = sample(cond_model, sampler, iterations;
                 progress=true, save_state=true)
 
 # Save the actual chain.                
-write(joinpath(folname, string("chain_", last_n+1,".jls")), chain)
+@save joinpath(folname, string("chain_", last_n+1,".jls")) chain
 CSV.write(joinpath(folname, string("chain_", last_n+1,".csv")), chain)
 CSV.write(joinpath(folname, string("summary_", last_n+1,".csv")), describe(chain)[1])
