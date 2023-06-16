@@ -1,42 +1,42 @@
-using Distributed
+using LinearAlgebra
+using Turing
+using LimberJack
+using GaussianProcess
+using CSV
+using NPZ
+using YAML
+using PythonCall
+sacc = pyimport("sacc");
 
-@everywhere using Turing
-@everywhere using LimberJack
-@everywhere using CSV
-@everywhere using NPZ
-@everywhere using FITSIO
-@everywhere using PythonCall
-@everywhere np = pyimport("numpy")
+#println("My id is ", myid(), " and I have ", Threads.nthreads(), " threads")
 
-@everywhere println("My id is ", myid(), " and I have ", Threads.nthreads(), " threads")
+sacc_path = "../../data/FD/cls_FD_covG.fits"
+yaml_path = "../../data/ND/ND.yml"
+sacc_file = sacc.Sacc().load_fits(sacc_path)
+yaml_file = YAML.load_file(yaml_path)
+meta, files = make_data(sacc_file, yaml_file)
 
-@everywhere data_set = "ND"
-@everywhere meta = np.load(string("../data/", data_set, "/", data_set, "_meta.npz"))
-@everywhere files = npzread(string("../data/", data_set, "/", data_set, "_files.npz"))
+cls_data = meta.data
+cls_cov = meta.cov
 
-@everywhere tracers_names = pyconvert(Vector{String}, meta["tracers"])
-@everywhere pairs = pyconvert(Vector{Vector{String}}, meta["pairs"])
-@everywhere idx = pyconvert(Vector{Int}, meta["idx"])
-@everywhere cls_data = pyconvert(Vector{Float64}, meta["cls"])
-@everywhere cls_cov = pyconvert(Matrix{Float64}, meta["cov"]);
+fs8_meta = npzread("../../data/fs8s/fs8s.npz")
+fs8_zs = fs8_meta["z"]
+fs8_data = fs8_meta["data"]
+fs8_cov = fs8_meta["cov"]
 
-@everywhere fs8_meta = npzread("../data/fs8s/fs8s.npz")
-@everywhere fs8_zs = fs8_meta["z"]
-@everywhere fs8_data = fs8_meta["data"]
-@everywhere fs8_cov = fs8_meta["cov"]
+cov = zeros(Float64, length(fs8_data)+length(cls_data), length(fs8_data)+length(cls_data))
+cov[1:length(fs8_data), 1:length(fs8_data)] = fs8_cov
+cov[length(fs8_data)+1:(length(fs8_data)+length(cls_data)),
+    length(fs8_data)+1:(length(fs8_data)+length(cls_data))] = cls_cov
+data = [fs8_data; cls_data];
 
-@everywhere cov_tot = zeros(Float64, length(fs8_data)+length(cls_data), length(fs8_data)+length(cls_data))
-@everywhere cov_tot[1:length(fs8_data), 1:length(fs8_data)] = fs8_cov
-@everywhere cov_tot[length(fs8_data)+1:(length(fs8_data)+length(cls_data)),
-        length(fs8_data)+1:(length(fs8_data)+length(cls_data))] = cls_cov
-@everywhere data_vector = [fs8_data ; cls_data];
+errs = sqrt.(diag(cov))
+data = data ./ errs
+cov = Hermitian(cov ./ (errs * errs')) 
 
-@everywhere @model function model(data_vector;
-                                  tracers_names=tracers_names,
-                                  pairs=pairs,
-                                  idx=idx,
-                                  cov_tot=cov_tot, 
-                                  files=files)
+@model function model(data;
+    meta=meta,
+    files=files)
 
     #KiDS priors
     Ωm ~ Uniform(0.2, 0.6)
@@ -107,37 +107,34 @@ using Distributed
     fs8s = fs8(cosmology, fs8_zs)
     theory = [fs8s; cls]
 
-    data_vector ~ MvNormal(theory, cov_tot)
+    data_vector ~ MvNormal(theory ./ errs, cov)
 end;
 
-cycles = 6
-steps = 50
-iterations = 100
-TAP = 0.60
-adaptation = 100
-init_ϵ = 0.05
-nchains = nprocs()
+iterations = 1
+adaptation = 0
+TAP = 0.65
+init_ϵ = 0.01
+
 println("sampling settings: ")
-println("cycles ", cycles)
 println("iterations ", iterations)
 println("TAP ", TAP)
 println("adaptation ", adaptation)
-println("init_ϵ ", init_ϵ)
-println("nchains ", nchains)
+#println("nchains ", nchains)
 
 # Start sampling.
-folpath = "../chains"
-folname = string(data_set, "_RSD_TAP_", TAP)
+folpath = "../../chains/NUTS/18_runs/"
+folname = string("ND_RSD_TAP_", TAP)
 folname = joinpath(folpath, folname)
 
 if isdir(folname)
     fol_files = readdir(folname)
-    println("Found existing file")
+    println("Found existing file ", folname)
     if length(fol_files) != 0
         last_chain = last([file for file in fol_files if occursin("chain", file)])
         last_n = parse(Int, last_chain[7])
-        println("Restarting chain")
+        #println("Restarting chain")
     else
+        #println("Starting new chain")
         last_n = 0
     end
 else
@@ -146,17 +143,16 @@ else
     last_n = 0
 end
 
-for i in (1+last_n):(cycles+last_n)
-    if i == 1
-        chain = sample(model(data_vector), NUTS(adaptation, TAP; init_ϵ=init_ϵ), #HMC(init_ϵ, steps),
-                       MCMCDistributed(), iterations, nchains, progress=true; save_state=true)
-    else
-        old_chain = read(joinpath(folname, string("chain_", i-1,".jls")), Chains)
-        chain = sample(model(data_vector), NUTS(adaptation, TAP; init_ϵ=init_ϵ), #HMC(init_ϵ, steps),
-                       MCMCDistributed(), iterations, nchains, progress=true; save_state=true,
-                       resume_from=old_chain)
-    end  
-    write(joinpath(folname, string("chain_", i,".jls")), chain)
-    CSV.write(joinpath(folname, string("chain_", i,".csv")), chain)
-    CSV.write(joinpath(folname, string("summary_", i,".csv")), describe(chain)[1])
-end
+# Create a placeholder chain file.
+CSV.write(joinpath(folname, string("chain_", last_n+1,".csv")), Dict("samples"=>[]))
+
+# Sample
+cond_model = model(data)
+sampler = NUTS(adaptation, TAP)
+chain = sample(cond_model, sampler, iterations;
+                progress=true, save_state=true)
+
+# Save the actual chain.                
+@save joinpath(folname, string("chain_", last_n+1,".jls")) chain
+CSV.write(joinpath(folname, string("chain_", last_n+1,".csv")), chain)
+CSV.write(joinpath(folname, string("summary_", last_n+1,".csv")), describe(chain)[1])
