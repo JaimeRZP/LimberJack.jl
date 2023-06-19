@@ -99,19 +99,18 @@ cov = Hermitian(cov ./ (errs * errs'))
 
     
     cosmology = LimberJack.Cosmology(Ωm, Ωb, h, ns, s8,
-                                     tk_mode="emulator",
+                                     tk_mode="EisHu",
                                      Pk_mode="Halofit")
     
-    cls = Theory(cosmology, tracers_names, pairs,
-                 idx, files; Nuisances=nuisances)
+    cls = Theory(cosmology, meta, files; Nuisances=nuisances)
     fs8s = fs8(cosmology, fs8_zs)
     theory = [fs8s; cls]
 
     data_vector ~ MvNormal(theory ./ errs, cov)
 end;
 
-iterations = 1
-adaptation = 0
+iterations = 300
+adaptation = 300
 TAP = 0.65
 init_ϵ = 0.01
 
