@@ -4,6 +4,7 @@ using LimberJack
 using GaussianProcess
 using CSV
 using NPZ
+using JLD2
 using YAML
 using PythonCall
 sacc = pyimport("sacc");
@@ -159,6 +160,6 @@ chain = sample(cond_model, sampler, iterations;
                 progress=true, save_state=true)
 
 # Save the actual chain.                
-# write(joinpath(folname, string("chain_", last_n+1,".jls")), chain)
+@save joinpath(folname, string("chain_", last_n+1,".jls")) chain
 CSV.write(joinpath(folname, string("chain_", last_n+1,".csv")), chain)
 CSV.write(joinpath(folname, string("summary_", last_n+1,".csv")), describe(chain)[1])

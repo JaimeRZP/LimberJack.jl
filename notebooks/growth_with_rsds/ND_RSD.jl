@@ -4,6 +4,7 @@ using LimberJack
 using GaussianProcess
 using CSV
 using NPZ
+using JLD2
 using YAML
 using PythonCall
 sacc = pyimport("sacc");
