@@ -52,8 +52,8 @@ x = range(0., stop=3., length=N)
     Ωm ~ Uniform(0.2, 0.6)
     Ωb ~ Uniform(0.028, 0.065)
     h ~ Truncated(Normal(0.72, 0.05), 0.64, 0.82)
+    σ8 = 0.81
     ns ~ Uniform(0.84, 1.1)
-    s8 = 0.811
     
     DESgc__0_b = 1.48 #~ Uniform(0.8, 3.0)
     DESgc__1_b = 1.81 #~ Uniform(0.8, 3.0)
