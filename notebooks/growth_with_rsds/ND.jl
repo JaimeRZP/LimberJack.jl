@@ -88,7 +88,7 @@ cov = Hermitian(cov ./ (errs * errs'))
                      "eBOSS__1_b" => eBOSS__1_b)
 
     
-    cosmology = Cosmology(Ωm, Ωb, h, ns, s8,
+    cosmology = Cosmology(Ωm, Ωb, h, ns, σ8,
                           tk_mode="EisHu",
                           Pk_mode="Halofit")
     
@@ -97,8 +97,8 @@ cov = Hermitian(cov ./ (errs * errs'))
     data ~ MvNormal(theory ./ errs, cov)
 end;
 
-iterations = 1
-adaptation = 0
+iterations = 300
+adaptation = 300
 TAP = 0.65
 init_ϵ = 0.01
 

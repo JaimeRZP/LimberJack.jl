@@ -107,7 +107,7 @@ x = range(0., stop=3., length=N)
     gp = conditional(latent_x, x, latent_gp, sqexp_cov_fn;
                      eta=1.0, l=l)
     
-    cosmology = Cosmology(Ωm, Ωb, h, ns, s8,
+    cosmology = Cosmology(Ωm, Ωb, h, ns, σ8,
                           tk_mode="EisHu",
                           Pk_mode="Halofit", 
                           custom_Dz=[x, gp])

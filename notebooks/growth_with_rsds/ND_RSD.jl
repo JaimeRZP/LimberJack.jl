@@ -72,31 +72,31 @@ cov = Hermitian(cov ./ (errs * errs'))
     eBOSS__0_b = 2.444 #~ Uniform(0.8, 5.0)
     eBOSS__1_b = 2.630 #~ Uniform(0.8, 5.0)
 
-    nuisances = Dict("DESgc__0_0_b" => DESgc__0_0_b,
-                     "DESgc__1_0_b" => DESgc__1_0_b,
-                     "DESgc__2_0_b" => DESgc__2_0_b,
-                     "DESgc__3_0_b" => DESgc__3_0_b,
-                     "DESgc__4_0_b" => DESgc__4_0_b,
-                     "DESgc__0_0_dz" => DESgc__0_0_dz,
-                     "DESgc__1_0_dz" => DESgc__1_0_dz,
-                     "DESgc__2_0_dz" => DESgc__2_0_dz,
-                     "DESgc__3_0_dz" => DESgc__3_0_dz,
-                     "DESgc__4_0_dz" => DESgc__4_0_dz,
-        
+    nuisances = Dict("DESgc__0_b" => DESgc__0_b,
+                     "DESgc__1_b" => DESgc__1_b,
+                     "DESgc__2_b" => DESgc__2_b,
+                     "DESgc__3_b" => DESgc__3_b,
+                     "DESgc__4_b" => DESgc__4_b,
+                     "DESgc__0_dz" => DESgc__0_dz,
+                     "DESgc__1_dz" => DESgc__1_dz,
+                     "DESgc__2_dz" => DESgc__2_dz,
+                     "DESgc__3_dz" => DESgc__3_dz,
+                     "DESgc__4_dz" => DESgc__4_dz,
+
                      "A_IA" => A_IA,
                      "alpha_IA" => alpha_IA,
 
-                     "DESwl__0_e_dz" => DESwl__0_e_dz,
-                     "DESwl__1_e_dz" => DESwl__1_e_dz,
-                     "DESwl__2_e_dz" => DESwl__2_e_dz,
-                     "DESwl__3_e_dz" => DESwl__3_e_dz,
-                     "DESwl__0_e_m" => DESwl__0_e_m,
-                     "DESwl__1_e_m" => DESwl__1_e_m,
-                     "DESwl__2_e_m" => DESwl__2_e_m,
-                     "DESwl__3_e_m" => DESwl__3_e_m,
-        
-                     "eBOSS__0_0_b" => eBOSS__0_0_b,
-                     "eBOSS__1_0_b" => eBOSS__1_0_b)
+                     "DESwl__0_dz" => DESwl__0_dz,
+                     "DESwl__1_dz" => DESwl__1_dz,
+                     "DESwl__2_dz" => DESwl__2_dz,
+                     "DESwl__3_dz" => DESwl__3_dz,
+                     "DESwl__0_m" => DESwl__0_m,
+                     "DESwl__1_m" => DESwl__1_m,
+                     "DESwl__2_m" => DESwl__2_m,
+                     "DESwl__3_m" => DESwl__3_m,
+
+                     "eBOSS__0_b" => eBOSS__0_b,
+                     "eBOSS__1_b" => eBOSS__1_b)
 
     
     cosmology = LimberJack.Cosmology(Ωm, Ωb, h, ns, s8,
