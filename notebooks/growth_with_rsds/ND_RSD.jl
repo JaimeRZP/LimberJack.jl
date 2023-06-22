@@ -143,16 +143,14 @@ else
     last_n = 0
 end
 
-# Create a placeholder chain file.
-CSV.write(joinpath(folname, string("chain_", last_n+1,".csv")), Dict("samples"=>[]))
-
 # Sample
 cond_model = model(data)
 sampler = NUTS(adaptation, TAP)
 chain = sample(cond_model, sampler, iterations;
-                progress=true, save_state=true)
+                progress=true, save_state=true,
+                call_back=Turing.SaveCSV,
+                chain_name=string("chain_", last_n+1,".csv"))
 
-# Save the actual chain.                
+# Save the actual chain.       
 @save joinpath(folname, string("chain_", last_n+1,".jls")) chain
-CSV.write(joinpath(folname, string("chain_", last_n+1,".csv")), chain)
 CSV.write(joinpath(folname, string("summary_", last_n+1,".csv")), describe(chain)[1])
