@@ -170,7 +170,7 @@ sampler = Gibbs(NUTS(adaptation, TAP, :Ωm, :Ωb, :h, :ns; init_ϵ=init_ϵ),
                 NUTS(adaptation, TAP, :v; init_ϵ=init_ϵ))
 chain = sample(cond_model, sampler, iterations;
                 progress=true, save_state=true,
-                call_back=Turing.Inference.SaveCSV,
+                callback=Turing.Inference.SaveCSV,
                 chain_name=string("chain_", last_n+1,".csv"))
 
 # Save the actual chain.       
