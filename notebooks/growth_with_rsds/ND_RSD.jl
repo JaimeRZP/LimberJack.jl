@@ -99,7 +99,7 @@ cov = Hermitian(cov ./ (errs * errs'))
                      "eBOSS__1_b" => eBOSS__1_b)
 
     
-    cosmology = LimberJack.Cosmology(Ωm, Ωb, h, ns, s8,
+    cosmology = LimberJack.Cosmology(Ωm, Ωb, h, ns, σ8,
                                      tk_mode="EisHu",
                                      Pk_mode="Halofit")
     
