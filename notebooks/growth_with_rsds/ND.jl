@@ -131,7 +131,7 @@ else
 end
 
 # Create a placeholder chain file.
-CSV.write(joinpath(folname, string("chain_", last_n+1,".csv")), Dict("params"=>[]))
+CSV.write(joinpath(folname, string("chain_", last_n+1,".csv")), Dict("params"=>[]), append=true)
 
 # Sample
 cond_model = model(data)
