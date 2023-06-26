@@ -152,8 +152,9 @@ sampler = NUTS(adaptation, TAP; init_ϵ=init_ϵ)
 chain = sample(cond_model, sampler, iterations;
                 progress=true, save_state=true,
                 callback=Turing.Inference.SaveCSV,
-                chain_name=joinpath(folname, string("chain_", last_n+1)))
+                chain_name=joinpath(folname, string("chain_temp_", last_n+1)))
 
 # Save the actual chain.       
 @save joinpath(folname, string("chain_", last_n+1,".jls")) chain
+CSV.write(joinpath(folname, string("chain_", last_n+1,".csv")), chain)
 CSV.write(joinpath(folname, string("summary_", last_n+1,".csv")), describe(chain)[1])
