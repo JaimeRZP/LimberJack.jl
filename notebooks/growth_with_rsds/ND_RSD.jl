@@ -143,9 +143,12 @@ else
     last_n = 0
 end
 
+# Create a placeholder chain file.
+CSV.write(joinpath(folname, string("chain_", last_n+1,".csv")), Dict("params"=>[]))
+
 # Sample
 cond_model = model(data)
-sampler = NUTS(adaptation, TAP)
+sampler = NUTS(adaptation, TAP; init_ϵ=init_ϵ)
 chain = sample(cond_model, sampler, iterations;
                 progress=true, save_state=true,
                 callback=Turing.Inference.SaveCSV,
