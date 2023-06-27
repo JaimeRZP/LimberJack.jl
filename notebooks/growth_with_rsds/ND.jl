@@ -20,9 +20,9 @@ meta, files = make_data(sacc_file, yaml_file)
 data = meta.data
 cov = meta.cov
 
-errs = sqrt.(diag(cov))
-data = data ./ errs
-cov = Hermitian(cov ./ (errs * errs')) 
+Γ = sqrt(cov)
+iΓ = inv(Γ)
+data = iΓ * data
 
 @model function model(data;
     meta=meta,
@@ -94,7 +94,7 @@ cov = Hermitian(cov ./ (errs * errs'))
     
     theory = Theory(cosmology, meta, files; Nuisances=nuisances)
     
-    data ~ MvNormal(theory ./ errs, cov)
+    data ~ MvNormal(iΓ * theory, I)
 end;
 
 iterations = 300

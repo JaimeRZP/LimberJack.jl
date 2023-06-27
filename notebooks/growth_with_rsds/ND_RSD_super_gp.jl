@@ -31,9 +31,9 @@ cov[length(fs8_data)+1:(length(fs8_data)+length(cls_data)),
     length(fs8_data)+1:(length(fs8_data)+length(cls_data))] = cls_cov
 data = [fs8_data; cls_data];
 
-errs = sqrt.(diag(cov))
-data = data ./ errs
-cov = Hermitian(cov ./ (errs * errs')) 
+Γ = sqrt(cov)
+iΓ = inv(Γ)
+data = iΓ * data
 
 fid_cosmo = Cosmology()
 n = 101
@@ -60,24 +60,6 @@ x = range(0., stop=3., length=N)
     DESgc__2_b = 1.78 #~ Uniform(0.8, 3.0)
     DESgc__3_b = 2.17 #~ Uniform(0.8, 3.0)
     DESgc__4_b = 2.21 #~ Uniform(0.8, 3.0)
-    DESgc__0_dz = -0.005 #~ TruncatedNormal(0.0, 0.007, -0.2, 0.2)
-    DESgc__1_dz = -0.008 #~ TruncatedNormal(0.0, 0.007, -0.2, 0.2)
-    DESgc__2_dz = -0.0001 #~ TruncatedNormal(0.0, 0.006, -0.2, 0.2)
-    DESgc__3_dz = 0.001 #~ TruncatedNormal(0.0, 0.01, -0.2, 0.2)
-    DESgc__4_dz = -0.004 #~ TruncatedNormal(0.0, 0.01, -0.2, 0.2)
-
-    A_IA = 0.27 #~ Uniform(-5, 5) 
-    alpha_IA = -2.41 #~ Uniform(-5, 5)
-
-    DESwl__0_dz = -0.018 #~ TruncatedNormal(-0.001, 0.016, -0.2, 0.2)
-    DESwl__1_dz = 0.001 #~ TruncatedNormal(-0.019, 0.013, -0.2, 0.2)
-    DESwl__2_dz = 0.004 #~ TruncatedNormal(0.009, 0.011, -0.2, 0.2)
-    DESwl__3_dz = 0.014 #~ TruncatedNormal(-0.018, 0.022, -0.2, 0.2)
-    DESwl__0_m = 0.049 #~ Normal(0.012, 0.023)
-    DESwl__1_m = 0.026 #~ Normal(0.012, 0.023)
-    DESwl__2_m = 0.026 #~ Normal(0.012, 0.023)
-    DESwl__3_m = -0.008 #~ Normal(0.012, 0.023)
-
     eBOSS__0_b = 2.444 #~ Uniform(0.8, 5.0)
     eBOSS__1_b = 2.630 #~ Uniform(0.8, 5.0)
 
@@ -86,24 +68,6 @@ x = range(0., stop=3., length=N)
                      "DESgc__2_b" => DESgc__2_b,
                      "DESgc__3_b" => DESgc__3_b,
                      "DESgc__4_b" => DESgc__4_b,
-                     "DESgc__0_dz" => DESgc__0_dz,
-                     "DESgc__1_dz" => DESgc__1_dz,
-                     "DESgc__2_dz" => DESgc__2_dz,
-                     "DESgc__3_dz" => DESgc__3_dz,
-                     "DESgc__4_dz" => DESgc__4_dz,
-
-                     "A_IA" => A_IA,
-                     "alpha_IA" => alpha_IA,
-
-                     "DESwl__0_dz" => DESwl__0_dz,
-                     "DESwl__1_dz" => DESwl__1_dz,
-                     "DESwl__2_dz" => DESwl__2_dz,
-                     "DESwl__3_dz" => DESwl__3_dz,
-                     "DESwl__0_m" => DESwl__0_m,
-                     "DESwl__1_m" => DESwl__1_m,
-                     "DESwl__2_m" => DESwl__2_m,
-                     "DESwl__3_m" => DESwl__3_m,
-
                      "eBOSS__0_b" => eBOSS__0_b,
                      "eBOSS__1_b" => eBOSS__1_b)
 
@@ -125,11 +89,10 @@ x = range(0., stop=3., length=N)
                           custom_Dz=[x, gp])
     
     cls = Theory(cosmology, meta, files; Nuisances=nuisances)
-    
     fs8s = fs8(cosmology, fs8_zs)
     theory = [fs8s; cls]
     
-    data ~ MvNormal(theory ./ errs, cov)
+    data ~ MvNormal(iΓ * theory, I)
 end;
 
 iterations = 100
