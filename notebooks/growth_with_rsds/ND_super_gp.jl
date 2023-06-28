@@ -81,7 +81,7 @@ x = range(0., stop=3., length=N)
     data ~ MvNormal(iΓ * theory, I)
 end;
 
-iterations = 100
+iterations = 300
 adaptation = 300
 TAP = 0.60
 init_ϵ = 0.005
