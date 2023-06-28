@@ -118,7 +118,7 @@ if isdir(folname)
     println("Found existing file ", folname)
     if length(fol_files) != 0
         last_chain = last([file for file in fol_files if occursin("chain", file)])
-        last_n = parse(Int, last_chain[7])
+        last_n = parse(Int, last_chain[end-4])
         #println("Restarting chain")
     else
         #println("Starting new chain")
