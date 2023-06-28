@@ -43,10 +43,7 @@ x = range(0., stop=3., length=N)
             
 @model function model(data;
     meta=meta,
-    files=files,
-    fid_cosmo=fid_cosmo,
-    latent_x=latent_x,
-    x=x)
+    files=files)
 
     #KiDS priors
     Ωm ~ Uniform(0.2, 0.6)
