@@ -41,23 +41,53 @@ x = range(0., stop=3., length=N)
     σ8 = 0.81
     ns ~ Uniform(0.84, 1.1)
     
-    DESgc__0_b = 1.48 #~ Uniform(0.8, 3.0)
-    DESgc__1_b = 1.81 #~ Uniform(0.8, 3.0)
-    DESgc__2_b = 1.78 #~ Uniform(0.8, 3.0)
-    DESgc__3_b = 2.17 #~ Uniform(0.8, 3.0)
-    DESgc__4_b = 2.21 #~ Uniform(0.8, 3.0)
-    eBOSS__0_b = 2.444 #~ Uniform(0.8, 5.0)
-    eBOSS__1_b = 2.630 #~ Uniform(0.8, 5.0)
+    DESgc__0_b ~ Uniform(0.8, 3.0)
+    DESgc__1_b ~ Uniform(0.8, 3.0)
+    DESgc__2_b ~ Uniform(0.8, 3.0)
+    DESgc__3_b ~ Uniform(0.8, 3.0)
+    DESgc__4_b ~ Uniform(0.8, 3.0)
+    DESgc__0_dz ~ TruncatedNormal(0.0, 0.007, -0.2, 0.2)
+    DESgc__1_dz ~ TruncatedNormal(0.0, 0.007, -0.2, 0.2)
+    DESgc__2_dz ~ TruncatedNormal(0.0, 0.006, -0.2, 0.2)
+    DESgc__3_dz ~ TruncatedNormal(0.0, 0.01, -0.2, 0.2)
+    DESgc__4_dz ~ TruncatedNormal(0.0, 0.01, -0.2, 0.2)
+    DESwl__0_dz ~ TruncatedNormal(-0.001, 0.016, -0.2, 0.2)
+    DESwl__1_dz ~ TruncatedNormal(-0.019, 0.013, -0.2, 0.2)
+    DESwl__2_dz ~ TruncatedNormal(0.009, 0.011, -0.2, 0.2)
+    DESwl__3_dz ~ TruncatedNormal(-0.018, 0.022, -0.2, 0.2)
+    DESwl__0_m ~ Normal(0.012, 0.023)
+    DESwl__1_m ~ Normal(0.012, 0.023)
+    DESwl__2_m ~ Normal(0.012, 0.023)
+    DESwl__3_m ~ Normal(0.012, 0.023)
+    A_IA ~ Uniform(-5, 5) 
+    alpha_IA ~ Uniform(-5, 5)
+    eBOSS__0_b ~ Uniform(0.8, 5.0)
+    eBOSS__1_b ~ Uniform(0.8, 5.0)
 
     nuisances = Dict("DESgc__0_b" => DESgc__0_b,
                      "DESgc__1_b" => DESgc__1_b,
                      "DESgc__2_b" => DESgc__2_b,
                      "DESgc__3_b" => DESgc__3_b,
                      "DESgc__4_b" => DESgc__4_b,
+                     "DESgc__0_dz" => DESgc__0_dz,
+                     "DESgc__1_dz" => DESgc__1_dz,
+                     "DESgc__2_dz" => DESgc__2_dz,
+                     "DESgc__3_dz" => DESgc__3_dz,
+                     "DESgc__4_dz" => DESgc__4_dz,
+                     "DESwl__0_dz" => DESwl__0_dz,
+                     "DESwl__1_dz" => DESwl__1_dz,
+                     "DESwl__2_dz" => DESwl__2_dz,
+                     "DESwl__3_dz" => DESwl__3_dz,
+                     "DESwl__0_m" => DESwl__0_m,
+                     "DESwl__1_m" => DESwl__1_m,
+                     "DESwl__2_m" => DESwl__2_m,
+                     "DESwl__3_m" => DESwl__3_m,
+                     "A_IA" => A_IA,
+                     "alpha_IA" => alpha_IA,
                      "eBOSS__0_b" => eBOSS__0_b,
                      "eBOSS__1_b" => eBOSS__1_b)
 
-    eta = 0.2
+    eta = 0.5
     l = 0.3
     latent_N = length(latent_x)
     v ~ filldist(truncated(Normal(0, 1), -2, 2), latent_N)
@@ -66,7 +96,7 @@ x = range(0., stop=3., length=N)
     K = sqexp_cov_fn(latent_x; eta=eta, l=l)
     latent_gp = latent_GP(mu, v, K)
     gp = conditional(latent_x, x, latent_gp, sqexp_cov_fn;
-                     eta=1.0, l=l)
+                     eta=eta, l=l)
     
     cosmology = Cosmology(Ωm, Ωb, h, ns, σ8,
                           tk_mode="EisHu",
@@ -90,7 +120,7 @@ println("adaptation ", adaptation)
 
 # Start sampling.
 folpath = "../../chains/NUTS/18_runs/"
-folname = string("ND_super_gp_EisHu_Gibbs_TAP_", TAP)
+folname = string("ND_super_gp_EisHu_full_Gibbs_TAP_", TAP)
 folname = joinpath(folpath, folname)
 
 if isdir(folname)
