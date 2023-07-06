@@ -145,8 +145,15 @@ CSV.write(joinpath(folname, string("chain_", last_n+1,".csv")), Dict("params"=>[
 
 # Sample
 cond_model = model(data)
-sampler = Gibbs(NUTS(adaptation, TAP, :Ωm, :Ωb, :h, :ns; init_ϵ=init_ϵ),
-                NUTS(adaptation, TAP, :v; init_ϵ=init_ϵ))
+sampler = Gibbs(NUTS(adaptation, TAP, :Ωm, :Ωb, :h, :ns,
+        :DESgc__0_b, :DESgc__1_b, :DESgc__2_b, :DESgc__3_b, :DESgc__4_b, 
+        :DESgc__0_dz, :DESgc__1_dz, :DESgc__2_dz, :DESgc__3_dz, :DESgc__4_dz, 
+        :DESwl__0_dz, :DESwl__1_dz, :DESwl__2_dz, :DESwl__3_dz, 
+        :DESwl__0_m, :DESwl__1_m, :DESwl__2_m, :DESwl__3_m,
+        :A_IA, :alpha_IA, 
+        :eBOSS__0_b, :eBOSS__1_b;
+        init_ϵ=init_ϵ),
+    NUTS(adaptation, TAP, :v; init_ϵ=init_ϵ))
 chain = sample(cond_model, sampler, iterations;
                 progress=true, save_state=true)
                 #callback=Turing.Inference.SaveCSV,
