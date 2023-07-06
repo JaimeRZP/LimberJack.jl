@@ -35,31 +35,28 @@ data = iΓ * data
     σ8 ~ Uniform(0.4, 1.2)
     ns ~ Uniform(0.84, 1.1)
     
-    DESgc__0_b = 1.48 #~ Uniform(0.8, 3.0)
-    DESgc__1_b = 1.81 #~ Uniform(0.8, 3.0)
-    DESgc__2_b = 1.78 #~ Uniform(0.8, 3.0)
-    DESgc__3_b = 2.17 #~ Uniform(0.8, 3.0)
-    DESgc__4_b = 2.21 #~ Uniform(0.8, 3.0)
-    DESgc__0_dz = -0.005 #~ TruncatedNormal(0.0, 0.007, -0.2, 0.2)
-    DESgc__1_dz = -0.008 #~ TruncatedNormal(0.0, 0.007, -0.2, 0.2)
-    DESgc__2_dz = -0.0001 #~ TruncatedNormal(0.0, 0.006, -0.2, 0.2)
-    DESgc__3_dz = 0.001 #~ TruncatedNormal(0.0, 0.01, -0.2, 0.2)
-    DESgc__4_dz = -0.004 #~ TruncatedNormal(0.0, 0.01, -0.2, 0.2)
-
-    A_IA = 0.27 #~ Uniform(-5, 5) 
-    alpha_IA = -2.41 #~ Uniform(-5, 5)
-
-    DESwl__0_dz = -0.018 #~ TruncatedNormal(-0.001, 0.016, -0.2, 0.2)
-    DESwl__1_dz = 0.001 #~ TruncatedNormal(-0.019, 0.013, -0.2, 0.2)
-    DESwl__2_dz = 0.004 #~ TruncatedNormal(0.009, 0.011, -0.2, 0.2)
-    DESwl__3_dz = 0.014 #~ TruncatedNormal(-0.018, 0.022, -0.2, 0.2)
-    DESwl__0_m = 0.049 #~ Normal(0.012, 0.023)
-    DESwl__1_m = 0.026 #~ Normal(0.012, 0.023)
-    DESwl__2_m = 0.026 #~ Normal(0.012, 0.023)
-    DESwl__3_m = -0.008 #~ Normal(0.012, 0.023)
-
-    eBOSS__0_b = 2.444 #~ Uniform(0.8, 5.0)
-    eBOSS__1_b = 2.630 #~ Uniform(0.8, 5.0)
+    DESgc__0_b ~ Uniform(0.8, 3.0)
+    DESgc__1_b ~ Uniform(0.8, 3.0)
+    DESgc__2_b ~ Uniform(0.8, 3.0)
+    DESgc__3_b ~ Uniform(0.8, 3.0)
+    DESgc__4_b ~ Uniform(0.8, 3.0)
+    DESgc__0_dz ~ TruncatedNormal(0.0, 0.007, -0.2, 0.2)
+    DESgc__1_dz ~ TruncatedNormal(0.0, 0.007, -0.2, 0.2)
+    DESgc__2_dz ~ TruncatedNormal(0.0, 0.006, -0.2, 0.2)
+    DESgc__3_dz ~ TruncatedNormal(0.0, 0.01, -0.2, 0.2)
+    DESgc__4_dz ~ TruncatedNormal(0.0, 0.01, -0.2, 0.2)
+    DESwl__0_dz ~ TruncatedNormal(-0.001, 0.016, -0.2, 0.2)
+    DESwl__1_dz ~ TruncatedNormal(-0.019, 0.013, -0.2, 0.2)
+    DESwl__2_dz ~ TruncatedNormal(0.009, 0.011, -0.2, 0.2)
+    DESwl__3_dz ~ TruncatedNormal(-0.018, 0.022, -0.2, 0.2)
+    DESwl__0_m ~ Normal(0.012, 0.023)
+    DESwl__1_m ~ Normal(0.012, 0.023)
+    DESwl__2_m ~ Normal(0.012, 0.023)
+    DESwl__3_m ~ Normal(0.012, 0.023)
+    A_IA ~ Uniform(-5, 5) 
+    alpha_IA ~ Uniform(-5, 5)
+    eBOSS__0_b ~ Uniform(0.8, 5.0)
+    eBOSS__1_b ~ Uniform(0.8, 5.0)
 
     nuisances = Dict("DESgc__0_b" => DESgc__0_b,
                      "DESgc__1_b" => DESgc__1_b,
@@ -71,10 +68,6 @@ data = iΓ * data
                      "DESgc__2_dz" => DESgc__2_dz,
                      "DESgc__3_dz" => DESgc__3_dz,
                      "DESgc__4_dz" => DESgc__4_dz,
-
-                     "A_IA" => A_IA,
-                     "alpha_IA" => alpha_IA,
-
                      "DESwl__0_dz" => DESwl__0_dz,
                      "DESwl__1_dz" => DESwl__1_dz,
                      "DESwl__2_dz" => DESwl__2_dz,
@@ -83,11 +76,11 @@ data = iΓ * data
                      "DESwl__1_m" => DESwl__1_m,
                      "DESwl__2_m" => DESwl__2_m,
                      "DESwl__3_m" => DESwl__3_m,
-
+                     "A_IA" => A_IA,
+                     "alpha_IA" => alpha_IA,
                      "eBOSS__0_b" => eBOSS__0_b,
                      "eBOSS__1_b" => eBOSS__1_b)
 
-    
     cosmology = Cosmology(Ωm, Ωb, h, ns, σ8,
                           tk_mode="EisHu",
                           Pk_mode="Halofit")
@@ -110,7 +103,7 @@ println("adaptation ", adaptation)
 
 # Start sampling.
 folpath = "../../chains/NUTS/18_runs/"
-folname = string("ND_TAP_", TAP)
+folname = string("ND_full_TAP_", TAP)
 folname = joinpath(folpath, folname)
 
 if isdir(folname)
