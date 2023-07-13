@@ -124,7 +124,7 @@ end;
 
 iterations = 300
 adaptation = 300
-TAP = 0.60
+TAP = 0.65
 init_ϵ = 0.005
 
 println("sampling settings: ")
@@ -165,9 +165,8 @@ sampler = Gibbs(NUTS(adaptation, TAP, :Ωm, :Ωb, :h, :ns,
         :DESwl__0_dz, :DESwl__1_dz, :DESwl__2_dz, :DESwl__3_dz, 
         :DESwl__0_m, :DESwl__1_m, :DESwl__2_m, :DESwl__3_m,
         :A_IA, :alpha_IA, 
-        :eBOSS__0_b, :eBOSS__1_b;
-        init_ϵ=init_ϵ),
-    NUTS(adaptation, TAP, :v; init_ϵ=init_ϵ))
+        :eBOSS__0_b, :eBOSS__1_b),
+    NUTS(adaptation, TAP, :v))
 chain = sample(cond_model, sampler, iterations;
                 progress=true, save_state=true)
                 #scallback=Turing.Inference.SaveCSV,

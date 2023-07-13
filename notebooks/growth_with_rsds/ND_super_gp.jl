@@ -110,7 +110,7 @@ end;
 
 iterations = 300
 adaptation = 300
-TAP = 0.60
+TAP = 0.65
 init_ϵ = 0.005
 
 println("sampling settings: ")
