@@ -109,7 +109,7 @@ x = range(0., stop=3., length=N)
 end;
 
 iterations = 300
-adaptation = 300
+adaptation = 500
 TAP = 0.65
 init_ϵ = 0.005
 
