@@ -8,7 +8,7 @@ export angularCℓs, angularCℓ, angularCℓFast
 export Theory
 export make_data
 
-using Interpolations, LinearAlgebra, Statistics, QuadGK, Bolt
+using Interpolations, LinearAlgebra, Statistics, QuadGK
 using NPZ, NumericalIntegration, PythonCall, Artifacts 
 include("core.jl")
 include("boltzmann.jl")
@@ -25,7 +25,12 @@ const CLIGHT_HMPC = 2997.92458
 function __init__()
     emupk_files = npzread(joinpath(artifact"emupk", "emupk.npz"))
     global emulator = Emulator(emupk_files)
-    return nothing
+
+    @static if !isdefined(Base, :get_extension)
+        @require Bolt = "d94d39b4-3f51-4e5a-bfd8-f3b08e8f2b62" begin
+            include("../ext/BoltExt.jl")
+        end
+    end
 end       
 
-end
+end # module

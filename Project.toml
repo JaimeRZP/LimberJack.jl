@@ -5,7 +5,6 @@ version = "0.1.0"
 
 [deps]
 Artifacts = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
-Bolt = "d94d39b4-3f51-4e5a-bfd8-f3b08e8f2b62"
 Interpolations = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 NPZ = "15e1cf62-19b3-5cfa-8e77-841668bca605"
@@ -18,3 +17,9 @@ Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 Interpolations = "0.14.7"
 "NumericalIntegration" = "0.2.0"
 julia = "1.9"
+
+[extensions]
+BoltExt = "Bolt"
+
+[extras]
+Bolt = "d94d39b4-3f51-4e5a-bfd8-f3b08e8f2b62"
