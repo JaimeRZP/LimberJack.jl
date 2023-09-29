@@ -9,9 +9,7 @@ export Theory
 export make_data
 
 using Interpolations, LinearAlgebra, Statistics, QuadGK, Bolt
-using NPZ, NumericalIntegration, PythonCall, LoopVectorization 
-using Artifacts # OrdinaryDiffEq
-
+using NPZ, NumericalIntegration, PythonCall, Artifacts 
 include("core.jl")
 include("boltzmann.jl")
 include("data_utils.jl")
