@@ -38,9 +38,9 @@ mutable struct Settings
     using_As::Bool
 
     cosmo_type::DataType
-    tk_mode::String
-    Dz_mode::String
-    Pk_mode::String
+    tk_mode::Symbol
+    Dz_mode::Symbol
+    Pk_mode::Symbol
 end        
 ``` 
 """
@@ -63,9 +63,9 @@ mutable struct Settings
     using_As::Bool
 
     cosmo_type::DataType
-    tk_mode::String
-    Dz_mode::String
-    Pk_mode::String
+    tk_mode::Symbol
+    Dz_mode::Symbol
+    Pk_mode::Symbol
 end
 
 Settings(;kwargs...) = begin
@@ -87,9 +87,9 @@ Settings(;kwargs...) = begin
     using_As = get(kwargs, :using_As, false)
 
     cosmo_type = get(kwargs, :cosmo_type, Float64)
-    tk_mode = get(kwargs, :tk_mode, "EisHu")
-    Dz_mode = get(kwargs, :Dz_mode, "RK2")
-    Pk_mode = get(kwargs, :Pk_mode, "linear")
+    tk_mode = get(kwargs, :tk_mode, :EisHu)
+    Dz_mode = get(kwargs, :Dz_mode, :RK2)
+    Pk_mode = get(kwargs, :Pk_mode, :linear)
     Settings(nz, nz_chi, nz_t, nk, nℓ,
              xs, zs, zs_chi, zs_t, ks, ℓs, logk,  dlogk,
              using_As,
@@ -264,11 +264,11 @@ Cosmology(cpar::CosmoPar, settings::Settings; kwargs...) = begin
     zi = linear_interpolation(chis, Vector(zs_chi), extrapolation_bc=Line())
     Dzs, Dzi, fs8zi = get_growth(cpar, settings; kwargs...)
 
-    if settings.Pk_mode == "linear"
+    if settings.Pk_mode == :linear
         Pks = pk0 * (Dzs.^2)'
         Pki = linear_interpolation((logk, zs), log.(Pks);
                                    extrapolation_bc=Line())
-    elseif settings.Pk_mode == "Halofit"
+    elseif settings.Pk_mode == :Halofit
         Pki = get_PKnonlin(cpar, zs, ks, pk0, Dzs;
                           cosmo_type=cosmo_type)
     else 

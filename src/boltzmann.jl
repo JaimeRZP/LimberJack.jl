@@ -99,21 +99,7 @@ function _inv_y_transformation(emulator::Emulator, point)
     return exp.(emulator.std_log_Pks .* point .+ emulator.mean_log_Pks)
 end
 
-function _get_kernel(arr1, arr2, hyper)
-    arr1_w = @.(arr1/exp(hyper[2:6]))
-    arr2_w = @.(arr2/exp(hyper[2:6]))
-    
-    # compute the pairwise distance
-    term1 = sum(arr1_w.^2, dims=1)
-    term2 = 2 * (arr1_w' * arr2_w)'
-    term3 = sum(arr2_w.^2, dims=1)
-    dist = @.(term1-term2+term3)
-    # compute the kernel
-    kernel = @.(exp(hyper[1])*exp(-0.5*dist))
-    return kernel
-end
-
-function get_emulated_log_pk0(cpar::CosmoPar, settings::Settings)
+function lin_Pk0(mode::Val{:EmuPk}, cpar::CosmoPar, settings::Settings)
     cosmotype = settings.cosmo_type
     wc = cpar.Ωc*cpar.h^2
     wb = cpar.Ωb*cpar.h^2
@@ -121,17 +107,21 @@ function get_emulated_log_pk0(cpar::CosmoPar, settings::Settings)
     params = [wc, wb, ln1010As, cpar.ns, cpar.h]
     params_t = _x_transformation(emulator, params')
     
-    nk = length(emulator.training_karr)
+    lks_emul = emulator.training_karr
+    nk = length(lks_emul)
     pk0s_t = zeros(cosmotype, nk)
     @inbounds for i in 1:nk
         kernel = _get_kernel(emulator.trans_cosmos, params_t, emulator.hypers[i, :])
         pk0s_t[i] = dot(vec(kernel), vec(emulator.alphas[i,:]))
     end
-    pk0s = vec(_inv_y_transformation(emulator, pk0s_t))
-    return emulator.training_karr, pk0s
+    pk0_emul = vec(_inv_y_transformation(emulator, pk0s_t))
+    pki_emul = cubic_spline_interpolation(lks_emul, log.(pk0_emul),
+                                            extrapolation_bc=Line())
+    pk0 = exp.(pki_emul(settings.logk))
+    return pk0
 end
 
-function get_Bolt_pk0(cpar::CosmoPar, settings::Settings)
+function lin_Pk0(mode::Val{:Bolt}, cpar::CosmoPar, settings::Settings)
     𝕡 = Bolt.CosmoParams(h = cpar.h,
         Ω_r = cpar.Ωg,
         Ω_b = cpar.Ωb,
@@ -146,8 +136,34 @@ function get_Bolt_pk0(cpar::CosmoPar, settings::Settings)
     ih = IonizationHistory(𝕣, 𝕡, bg)
     ks_Bolt = LinRange(-4, 2, settings.nk)
     ks_Bolt = 10 .^(k_grid) 
-    pL = [plin(k,𝕡,bg,ih) for k in ks_Bolt]
-    return ks_Bolt, pL
+    pk0_Bolt = [plin(k,𝕡,bg,ih) for k in ks_Bolt]
+    pki_Bolt = linear_interpolation(ks_Bolt, log.(pk0_Bolt);
+                                    extrapolation_bc=Line())
+    pk0 = exp.(pki_Bolt(settings.ks))
+    return pk0
+end
+
+function lin_Pk0(mode::Val{:EisHu}, cpar::CosmoPar, settings::Settings)
+    tk = TkEisHu(cpar, settings.ks./ cpar.h)
+    pk0 = @. settings.ks^cpar.ns * tk
+    return pk0
+end
+
+lin_Pk0(mode::Symbol, cpar::CosmoPar, settings::Settings) = lin_Pk0(Val(mode), cpar, settings)
+lin_Pk0(@nospecialize(mode), cpar::CosmoPar, settings::Settings) = error("Tk mode $(typeof(i)) not supported.")
+
+function _get_kernel(arr1, arr2, hyper)
+    arr1_w = @.(arr1/exp(hyper[2:6]))
+    arr2_w = @.(arr2/exp(hyper[2:6]))
+    
+    # compute the pairwise distance
+    term1 = sum(arr1_w.^2, dims=1)
+    term2 = 2 * (arr1_w' * arr2_w)'
+    term3 = sum(arr2_w.^2, dims=1)
+    dist = @.(term1-term2+term3)
+    # compute the kernel
+    kernel = @.(exp(hyper[1])*exp(-0.5*dist))
+    return kernel
 end
 
 function _w_tophat(x::Real)
@@ -178,22 +194,7 @@ function σR2(cosmo::Cosmology, R)
 end
 
 function lin_Pk0(cpar::CosmoPar, settings::Settings)
-    if settings.tk_mode == "emupk"
-        lks_emul, pk0_emul = get_emulated_log_pk0(cpar, settings)
-        pki_emul = cubic_spline_interpolation(lks_emul, log.(pk0_emul),
-                                              extrapolation_bc=Line())
-        pk0 = exp.(pki_emul(settings.logk))
-    elseif settings.tk_mode == "Bolt"
-        ks_Bolt, pk0_Bolt = get_Bolt_pk0(cpar, settings)
-        pki_Bolt = linear_interpolation(ks_Bolt, log.(pk0_Bolt);
-                                        extrapolation_bc=Line())
-        pk0 = exp.(pki_Bolt(settings.ks))
-    elseif settings.tk_mode == "EisHu"
-        tk = TkEisHu(cpar, settings.ks./ cpar.h)
-        pk0 = @. settings.ks^cpar.ns * tk
-     else
-        @error("Transfer function not implemented")
-    end
+    pk0 = lin_Pk0(settings.tk_mode, cpar, settings)
 
     #Renormalize Pk
     _σ8 = σR2(settings.ks, pk0, settings.dlogk, 8.0/cpar.h)

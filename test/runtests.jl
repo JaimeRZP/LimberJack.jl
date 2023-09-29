@@ -24,14 +24,14 @@ end
 test_output = Dict{String}{Vector}()
 
 if test_main
-    cosmo_EisHu = Cosmology(nz=1000, nz_t=1000, nz_pk=1000, nk=1000, tk_mode="EisHu")
+    cosmo_EisHu = Cosmology(nz=1000, nz_t=1000, nz_pk=1000, nk=1000, tk_mode=:EisHu)
     cosmo_emul = Cosmology(Ωm=(0.12+0.022)/0.75^2, Ωb=0.022/0.75^2, h=0.75, ns=1.0, σ8=0.81,
-        nz=1000, nz_t=1000, nz_pk=1000, nk=1000, tk_mode="emupk")
+        nz=1000, nz_t=1000, nz_pk=1000, nk=1000, tk_mode=:EmuPk)
     cosmo_emul_As = Cosmology(Ωm=0.27, Ωb=0.046, h=0.7, ns=1.0, As=2.097e-9,
-        nz=1000, nz_t=1000, nz_pk=1000, nk=1000, tk_mode="emupk")
-    cosmo_EisHu_nonlin = Cosmology(nk=1000, nz=1000, nz_t=1000, nz_pk=1000, tk_mode="EisHu", Pk_mode="Halofit")
+        nz=1000, nz_t=1000, nz_pk=1000, nk=1000, tk_mode=:EmuPk)
+    cosmo_EisHu_nonlin = Cosmology(nk=1000, nz=1000, nz_t=1000, nz_pk=1000, tk_mode=:EisHu, Pk_mode=:Halofit)
     cosmo_emul_nonlin = Cosmology(Ωm=(0.12+0.022)/0.75^2, Ωb=0.022/0.75^2, h=0.75, ns=1.0, σ8=0.81,
-    nk=1000, nz=1000, nz_t=1000, nz_pk=1000, tk_mode="emupk", Pk_mode="Halofit")
+    nk=1000, nz=1000, nz_t=1000, nz_pk=1000, tk_mode=:EmuPk, Pk_mode=:Halofit)
 
     @testset "Main tests" begin
         @testset "CreateCosmo" begin
@@ -433,13 +433,13 @@ if test_main
             end
 
             function lin_EisHu(p)
-                cosmo = Cosmology(Ωm=p, tk_mode="EisHu", Pk_mode="linear")
+                cosmo = Cosmology(Ωm=p, tk_mode=:EisHu, Pk_mode=:linear)
                 pk = lin_Pk(cosmo, ks, 0.)
                 return pk
             end
 
             function lin_emul(p)
-                cosmo = Cosmology(Ωm=p, tk_mode="emupk", Pk_mode="linear")
+                cosmo = Cosmology(Ωm=p, tk_mode=:EmuPk, Pk_mode=:linear)
                 pk = lin_Pk(cosmo, ks, 0.)
                 return pk
             end
@@ -471,13 +471,13 @@ if test_main
             end
                                                     
             function nonlin_EisHu(p)
-                cosmo = Cosmology(Ωm=p, tk_mode="EisHu", Pk_mode="Halofit")
+                cosmo = Cosmology(Ωm=p, tk_mode=:EisHu, Pk_mode=:Halofit)
                 pk = nonlin_Pk(cosmo, ks, z)
                 return pk
             end
 
             function nonlin_emul(p)
-                cosmo = Cosmology(Ωm=p, tk_mode="emupk", Pk_mode="Halofit")
+                cosmo = Cosmology(Ωm=p, tk_mode=:EmuPk, Pk_mode=:Halofit)
                 pk = nonlin_Pk(cosmo, ks, z)
                 return pk
             end
@@ -554,7 +554,7 @@ if test_main
             end
 
             function Cl_gg(p::T)::Array{T,1} where T<:Real
-                cosmo = LimberJack.Cosmology(Ωm=p, tk_mode="EisHu", Pk_mode="Halofit",
+                cosmo = LimberJack.Cosmology(Ωm=p, tk_mode=:EisHu, Pk_mode=:Halofit,
                     nz=700, nz_t=700, nz_pk=700)
                 z = Vector(range(0., stop=2., length=1000))
                 nz = Vector(@. exp(-0.5*((z-0.5)/0.05)^2))
@@ -564,7 +564,7 @@ if test_main
             end
             
             function Cl_gs(p::T)::Array{T,1} where T<:Real
-                cosmo = LimberJack.Cosmology(Ωm=p, tk_mode="EisHu", Pk_mode="Halofit", 
+                cosmo = LimberJack.Cosmology(Ωm=p, tk_mode=:EisHu, Pk_mode=:Halofit, 
                     nz=700, nz_t=700, nz_pk=700)
                 z = Vector(range(0., stop=2., length=1000))
                 nz = Vector(@. exp(-0.5*((z-0.5)/0.05)^2))
@@ -577,7 +577,7 @@ if test_main
             end
 
             function Cl_ss(p::T)::Array{T,1} where T<:Real
-                cosmo = LimberJack.Cosmology(Ωm=p, tk_mode="EisHu", Pk_mode="Halofit",
+                cosmo = LimberJack.Cosmology(Ωm=p, tk_mode=:EisHu, Pk_mode=:Halofit,
                     nz=700, nz_t=700, nz_pk=700)
                 z = Vector(range(0., stop=2., length=1000))
                 nz = Vector(@. exp(-0.5*((z-0.5)/0.05)^2))
@@ -589,7 +589,7 @@ if test_main
             end
             
             function Cl_sk(p::T)::Array{T,1} where T<:Real
-                cosmo = LimberJack.Cosmology(Ωm=p, tk_mode="EisHu", Pk_mode="Halofit",
+                cosmo = LimberJack.Cosmology(Ωm=p, tk_mode=:EisHu, Pk_mode=:Halofit,
                     nz=500, nz_t=500, nz_pk=700)
                 z = range(0., stop=2., length=256)
                 nz = @. exp(-0.5*((z-0.5)/0.05)^2)
@@ -602,7 +602,7 @@ if test_main
             end
 
             function Cl_gk(p::T)::Array{T,1} where T<:Real
-                cosmo = LimberJack.Cosmology(Ωm=p, tk_mode="EisHu", Pk_mode="Halofit",
+                cosmo = LimberJack.Cosmology(Ωm=p, tk_mode=:EisHu, Pk_mode=:Halofit,
                     nz=700, nz_t=700, nz_pk=700)
                 z = range(0., stop=2., length=256)
                 nz = @. exp(-0.5*((z-0.5)/0.05)^2)
@@ -613,7 +613,7 @@ if test_main
             end
 
             function Cl_kk(p::T)::Array{T,1} where T<:Real
-                cosmo = LimberJack.Cosmology(Ωm=p, tk_mode="EisHu", Pk_mode="Halofit",
+                cosmo = LimberJack.Cosmology(Ωm=p, tk_mode=:EisHu, Pk_mode=:Halofit,
                     nz=700, nz_t=700, nz_pk=700)
                 z = range(0., stop=2., length=256)
                 nz = @. exp(-0.5*((z-0.5)/0.05)^2)
@@ -689,7 +689,7 @@ if test_main
         @testset "AreNuisancesDiff" begin
             
             function bias(p::T)::Array{T,1} where T<:Real
-                cosmo = Cosmology(tk_mode="EisHu", Pk_mode="Halofit")
+                cosmo = Cosmology(tk_mode=:EisHu, Pk_mode=:Halofit)
                 cosmo.settings.cosmo_type = typeof(p)
                 z = Vector(range(0., stop=2., length=1000))
                 nz = Vector(@. exp(-0.5*((z-0.5)/0.05)^2))
@@ -700,7 +700,7 @@ if test_main
             end
             
             function dz(p::T)::Array{T,1} where T<:Real
-                cosmo = Cosmology(tk_mode="EisHu", Pk_mode="Halofit", nz=300)
+                cosmo = Cosmology(tk_mode=:EisHu, Pk_mode=:Halofit, nz=300)
                 cosmo.settings.cosmo_type = typeof(p)
                 z = Vector(range(0., stop=2., length=1000)) .- p
                 nz = Vector(@. exp(-0.5*((z-0.5)/0.05)^2))
@@ -711,7 +711,7 @@ if test_main
             end
             
             function mbias(p::T)::Array{T,1} where T<:Real
-                cosmo = Cosmology(tk_mode="EisHu", Pk_mode="Halofit")
+                cosmo = Cosmology(tk_mode=:EisHu, Pk_mode=:Halofit)
                 cosmo.settings.cosmo_type = typeof(p)
                 z = range(0., stop=2., length=256)
                 nz = @. exp(-0.5*((z-0.5)/0.05)^2)
@@ -722,7 +722,7 @@ if test_main
             end
             
             function IA_A(p::T)::Array{T,1} where T<:Real
-                cosmo = Cosmology(tk_mode="EisHu", Pk_mode="Halofit", )
+                cosmo = Cosmology(tk_mode=:EisHu, Pk_mode=:Halofit, )
                 cosmo.settings.cosmo_type = typeof(p)
                 z = range(0., stop=2., length=256)
                 nz = @. exp(-0.5*((z-0.5)/0.05)^2)
@@ -733,7 +733,7 @@ if test_main
             end
             
             function IA_alpha(p::T)::Array{T,1} where T<:Real
-                cosmo = Cosmology(tk_mode="EisHu", Pk_mode="Halofit")
+                cosmo = Cosmology(tk_mode=:EisHu, Pk_mode=:Halofit)
                 cosmo.settings.cosmo_type = typeof(p)
                 z = range(0., stop=2., length=256)
                 nz = @. exp(-0.5*((z-0.5)/0.05)^2)
@@ -776,7 +776,7 @@ if test_Bolt
                             nk=70, nz=300, nz_pk=70, tk_mode="Bolt")
     cosmo_Bolt_nonlin = Cosmology(Ωm=0.27, Ωb=0.046, h=0.70, ns=1.0, σ8=0.81,
                                 nk=70, nz=300, nz_pk=70,
-                                tk_mode="Bolt", Pk_mode="Halofit")
+                                tk_mode="Bolt", Pk_mode=:Halofit)
 
     @testset "Bolt tests" begin
         @testset "linear_Pk_As" begin
@@ -808,7 +808,7 @@ if test_Bolt
             end     
 
             function lin_Bolt(p)
-                cosmo = Cosmology(Ωm=p, tk_mode="Bolt", Pk_mode="linear")
+                cosmo = Cosmology(Ωm=p, tk_mode="Bolt", Pk_mode=:linear)
                 pk = lin_Pk(cosmo, ks, 0.)
                 return pk
             end
