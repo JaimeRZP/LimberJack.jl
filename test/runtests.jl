@@ -773,10 +773,10 @@ if test_Bolt
     Bolt_test_output = Dict{String}{Vector}()
 
     cosmo_Bolt_As = Cosmology(Ωm=0.27, Ωb=0.046, h=0.7, ns=1.0, As=2.097e-9,
-                            nk=70, nz=300, nz_pk=70, tk_mode="Bolt")
+                            nk=70, nz=300, nz_pk=70, tk_mode=:Bolt)
     cosmo_Bolt_nonlin = Cosmology(Ωm=0.27, Ωb=0.046, h=0.70, ns=1.0, σ8=0.81,
                                 nk=70, nz=300, nz_pk=70,
-                                tk_mode="Bolt", Pk_mode=:Halofit)
+                                tk_mode=:Bolt, Pk_mode=:Halofit)
 
     @testset "Bolt tests" begin
         @testset "linear_Pk_As" begin
@@ -808,7 +808,7 @@ if test_Bolt
             end     
 
             function lin_Bolt(p)
-                cosmo = Cosmology(Ωm=p, tk_mode="Bolt", Pk_mode=:linear)
+                cosmo = Cosmology(Ωm=p, tk_mode=:Bolt, Pk_mode=:linear)
                 pk = lin_Pk(cosmo, ks, 0.)
                 return pk
             end
