@@ -1,11 +1,6 @@
 name = "LimberJack"
 uuid = "6b86205d-155a-4b14-b82d-b6a149ea78f2"
-authors = ["Jaime Ruiz-Zapatero <jaimerz011235812@gmail.com>", 
-           "David Alonso", 
-           "Andrina Nicola", 
-           "Arrykrishna Mootoovaloo", 
-           "James Sullivan", 
-           "Marco Bonic"]
+authors = ["Jaime Ruiz-Zapatero <jaimerz011235812@gmail.com>", "David Alonso", "Andrina Nicola", "Arrykrishna Mootoovaloo", "James Sullivan", "Marco Bonic"]
 version = "0.1.0"
 
 [deps]
@@ -20,4 +15,6 @@ QuadGK = "1fd47b50-473d-5c70-9696-f719f8f3bcdc"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
 [compat]
+Interpolations = "0.14.7"
+"NumericalIntegration" = "0.2.0"
 julia = "1.9"
