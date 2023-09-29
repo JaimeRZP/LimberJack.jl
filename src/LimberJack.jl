@@ -22,6 +22,10 @@ include("theory.jl")
 # c/(100 km/s/Mpc) in Mpc
 const CLIGHT_HMPC = 2997.92458
 
+if !isdefined(Base, :get_extension)
+    using Requires
+end
+
 function __init__()
     emupk_files = npzread(joinpath(artifact"emupk", "emupk.npz"))
     global emulator = Emulator(emupk_files)
