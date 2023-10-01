@@ -10,7 +10,7 @@
 
 ## Design Philosophy
 
- + **Modularity**: each main function within ```LimberJack.jl``` has its own module. New functions can be added  by including extra modules. ```LimberJack.jl``` has the following modules:
+ + **Modularity**: each main function within ```LimberJack.jl``` has its own module. New functions can be added by including extra modules. ```LimberJack.jl``` has the following modules:
  
 | Module      | function    |
 | ----------- | :----------- |
@@ -23,8 +23,8 @@
 | ```theory.jl```   | Computes large data vectors that combine many spectra     |
 | ```tracers.jl``` | Computes the kernels associated with each type of kernel      |
 
-+ **Object-oriented**: ```LimberJack.jl```  mimics ```CCL.py``` class structure by using ```Julia```'s ```structures```.
-+ **Transparency**: ```LimberJack.jl```  is fully written in ```Julia``` without needing to inerface to any other programming language (```C```, ```Python```...) to compute thoretical predictions. This allows the user full access to the code from input to output.
++ **Object-oriented**: ```LimberJack.jl``` mimics ```CCL.py``` class structure by using ```Julia```'s ```structures```.
++ **Transparency**: ```LimberJack.jl``` is fully written in ```Julia``` without needing to interface to any other programming language (```C```, ```Python```...) to compute thoretical predictions. This allows the user full access to the code from input to output.
 
 ## Goals
 
@@ -74,6 +74,6 @@ Once you have installed ```Julia``` you can install ```LimberJack.jl``` followin
 
 ## Challenges
 
-1.  **Parallelization**: the current threading parallelization of ```LimberJack.jl``` is far away from the optimal one over number of threads scaling. Future works could study alternative parallalization schemes or  possible inneficiencies in the code. 
-2. **GPU's**: ```LimberJack.jl``` currently cannot run on GPU's which are known to significantly speed-up cosmological inference. Future works could study implementing ```Julia``` GPU libraries such as ```CUDA.jl```.
+1. **Parallelization**: the current threading parallelization of ```LimberJack.jl``` is far away from the optimal one over number of threads scaling. Future works could study alternative parallalization schemes or possible ineficiencies in the code. 
+2. **GPU's**: ```LimberJack.jl``` currently cannot run on GPUs which are known to significantly speed-up cosmological inference. Future works could study implementing ```Julia``` GPU libraries such as ```CUDA.jl```.
 3. **Backwards-AD**: currently ```LimberJack.jl```'s preferred AD mode is forward-AD. However, the key computation of cosmological inference, obtaining the $\chi^2$, is a map from N parameters to a scalar. For a large number of parameters, backwards-AD is in theory the preferred AD mode and should significantly speed up the computation of the gradient. Future works could look into making ```LimberJack.jl``` compatible with the latest ```Julia``` AD libraries such as ```Zygote.jl``` to implement efficient backwards-AD.
