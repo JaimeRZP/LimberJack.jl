@@ -127,8 +127,15 @@ function lin_Pk0(mode::Val{:EisHu}, cpar::CosmoPar, settings::Settings)
     return pk0
 end
 
-lin_Pk0(mode::Symbol, cpar::CosmoPar, settings::Settings) = lin_Pk0(Val(mode), cpar, settings)
-lin_Pk0(@nospecialize(mode), cpar::CosmoPar, settings::Settings) = error("Tk mode $(typeof(i)) not supported.")
+function lin_Pk0(mode::Val{:Custom}, cpar::CosmoPar, settings::Settings; kwargs...)
+    ks_c, pk_c = kwargs[:pk_custom]
+    pki_c = cubic_spline_interpolation(ks_c, Pk_c, extrapolation_bc=Line())
+    pk0 = pki_c(settings.ks)
+    return pk0
+end
+
+lin_Pk0(mode::Symbol, cpar::CosmoPar, settings::Settings; kwargs...) = lin_Pk0(Val(mode), cpar, settings; kwargs...)
+lin_Pk0(@nospecialize(mode), cpar::CosmoPar, settings::Settings; kwargs...) = error("Tk mode $(typeof(i)) not supported.")
 
 function _get_kernel(arr1, arr2, hyper)
     arr1_w = @.(arr1/exp(hyper[2:6]))

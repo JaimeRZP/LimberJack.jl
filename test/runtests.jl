@@ -8,10 +8,12 @@ test_main=true
 if test_main
     println("testing main functions")
 end  
+#=
 test_Bolt = false
 if test_Bolt
     println("testing Bolt.jl")
-end    
+end   
+=# 
 extensive= false
 if extensive
     println("extensive")
@@ -769,6 +771,7 @@ if test_main
     end
 end  
 
+#=
 if test_Bolt
     Bolt_test_output = Dict{String}{Vector}()
 
@@ -832,4 +835,5 @@ if test_Bolt
         end      
     end
 end    
+=#
 
