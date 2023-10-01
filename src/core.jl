@@ -249,7 +249,7 @@ Cosmology(cpar::CosmoPar, settings::Settings; kwargs...) = begin
     logk, nk = settings.logk, settings.nk
     ks = settings.ks
     dlogk = settings.dlogk
-    pk0, pki = lin_Pk0(cpar, settings)
+    pk0, pki = lin_Pk0(cpar, settings; kwargs...)
     # Compute redshift-distance relation
     norm = CLIGHT_HMPC / cpar.h
     chis = zeros(cosmo_type, nz_chi)
