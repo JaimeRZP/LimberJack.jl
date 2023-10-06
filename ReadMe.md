@@ -44,7 +44,7 @@ Once you have installed ```Julia``` you can install ```LimberJack.jl``` followin
 3. In the ```Julia``` command line run:
 ``` julia
     using Pkg
-    Pkg.add(path=".")
+    Pkg.add("LimberJack")
 ```
 ### Installing Sacc.py in Julia
 
@@ -62,8 +62,8 @@ Once you have installed ```Julia``` you can install ```LimberJack.jl``` followin
     
     # create LimberJack.jl Cosmology instance
     cosmology = Cosmology(Ωm=0.30, Ωb=0.05, h=0.70, ns=0.96, s8=0.81;
-                          tk_mode="EisHu",
-                          Pk_mode="Halofit")
+                          tk_mode=:EisHu,
+                          Pk_mode=:Halofit)
     
     z = Vector(range(0., stop=2., length=256))
     nz = @. exp(-0.5*((z-0.5)/0.05)^2)

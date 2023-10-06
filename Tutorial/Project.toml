@@ -1,0 +1,5 @@
+[deps]
+CondaPkg = "992eb4ea-22a4-4c89-a5bb-47a3300528ab"
+LimberJack = "6b86205d-155a-4b14-b82d-b6a149ea78f2"
+Turing = "fce5fe82-541a-59a6-adf8-730c64b5f9a0"
+YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
