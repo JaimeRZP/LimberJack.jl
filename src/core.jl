@@ -6,21 +6,41 @@ Constructor of settings structure constructor.
 Kwargs:
 
 - `nz::Int=300` : number of nodes in the general redshift array.
-- `nz_pk::Int=70` : number of nodes in the redshift array used to compute matter power spectrum grid.
+- `nz_chi::Int=1000` : number of nodes in the redshift array used to compute matter power spectrum grid.
 - `nz_t::Int=350` : number of nodes in the general redshift array.
 - `nk::Int=500`: number of nodes in the k-scale array used to compute matter power spectrum grid.
 - `nℓ::Int=300`: number of nodes in the multipoles array.
 - `using_As::Bool=false`: `True` if using the `As` parameter.
-- `cosmo_type::Type=Real` : type of cosmological parameters. 
-- `tk_mode::String="EisHu"` : choice of transfer function.
-- `Dz_mode::String="RK2"` : choice of method to compute the linear growth factor.
-- `Pk_mode::String="linear"` : choice of method to apply non-linear corrections to the matter power spectrum.
-- `custom_Dz::Any=nothing` : custom growth factor.
-- `emul_files=nothing` : emulator arrays. 
+- `cosmo_type::Type=Float64` : type of cosmological parameters. 
+- `tk_mode::String=:EisHu` : choice of transfer function.
+- `Dz_mode::String=:RK2` : choice of method to compute the linear growth factor.
+- `Pk_mode::String=:linear` : choice of method to apply non-linear corrections to the matter power spectrum.
 
-# Fields
+Returns:
+```
+mutable struct Settings
+    nz::Int
+    nz_chi::Int
+    nz_t::Int
+    nk::Int
+    nℓ::Int
 
-$(FIELDS)
+    xs
+    zs
+    zs_t
+    ks
+    ℓs
+    logk
+    dlogk
+
+    using_As::Bool
+
+    cosmo_type::DataType
+    tk_mode::Symbol
+    Dz_mode::Symbol
+    Pk_mode::Symbol
+end        
+``` 
 """
 mutable struct Settings
     nz::Int
@@ -94,9 +114,26 @@ Kwargs:
 - `Ωg::Dual=2.38163816E-5*θCMB^4/h^2`: cosmological density of relativistic species.
 - `Ωr::Dual=Ωg*(1.0 + N_ν * (7.0/8.0) * (4.0/11.0)^(4.0/3.0))`: cosmological radiation density.
 
-# Fields
+Returns:
 
-$(FIELDS)
+```
+mutable struct CosmoPar{T}
+    Ωm::T
+    Ωb::T
+    h::T
+    ns::T
+    As::T
+    σ8::T
+    θCMB::T
+    Y_p::T
+    N_ν::T
+    Σm_ν::T
+    Ωg::T
+    Ωr::T
+    Ωc::T
+    ΩΛ::T
+end     
+``` 
 """
 mutable struct CosmoPar{T}
     Ωm::T
@@ -185,9 +222,23 @@ Arguments:
 - `Settings::MutableStructure` : cosmology constructure settings. 
 - `CosmoPar::Structure` : cosmological parameters.
 
-# Fields
+Returns:
 
-$(FIELDS)
+```
+mutable struct Cosmology
+    settings::Settings
+    cpar::CosmoPar
+    chi::AbstractInterpolation
+    z_of_chi::AbstractInterpolation
+    t_of_z::AbstractInterpolation
+    chi_max
+    chi_LSS
+    Dz::AbstractInterpolation
+    fs8z::AbstractInterpolation
+    PkLz0::AbstractInterpolation
+    Pk::AbstractInterpolation
+end     
+``` 
 """
 Cosmology(cpar::CosmoPar, settings::Settings; kwargs...) = begin
     # Load settings
