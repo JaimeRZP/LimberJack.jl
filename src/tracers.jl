@@ -3,11 +3,9 @@ abstract type Tracer end
 """
     NumberCountsTracer(warr, chis, wint, b, lpre)
 Number counts tracer structure. 
-Arguments:
-- `wint::Interpolation` : interpolation of the radial kernel over comoving distance.
-- `F::Function` : prefactor.
-Returns:
-- `NumberCountsTracer::NumberCountsTracer` : Number counts tracer structure.
+# Fields
+
+$(FIELDS)
 """
 struct NumberCountsTracer <: Tracer
     wint::AbstractInterpolation
@@ -108,11 +106,9 @@ end
 """
     CMBLensingTracer(warr, chis, wint, lpre)
 CMB lensing tracer structure. 
-Arguments:
-- `wint::Interpolation` : interpolation of the radial kernel over comoving distance.
-- `F::Function` : prefactor.
-Returns:
-- `CMBLensingTracer::CMBLensingTracer` : CMB lensing tracer structure.
+# Fields
+
+$(FIELDS)
 """
 struct CMBLensingTracer <: Tracer
     wint::AbstractInterpolation

@@ -18,31 +18,9 @@ Kwargs:
 - `custom_Dz::Any=nothing` : custom growth factor.
 - `emul_files=nothing` : emulator arrays. 
 
-Returns:
-```
-mutable struct Settings
-    nz::Int
-    nz_chi::Int
-    nz_t::Int
-    nk::Int
-    nℓ::Int
+# Fields
 
-    xs
-    zs
-    zs_t
-    ks
-    ℓs
-    logk
-    dlogk
-
-    using_As::Bool
-
-    cosmo_type::DataType
-    tk_mode::Symbol
-    Dz_mode::Symbol
-    Pk_mode::Symbol
-end        
-``` 
+$(FIELDS)
 """
 mutable struct Settings
     nz::Int
@@ -116,26 +94,9 @@ Kwargs:
 - `Ωg::Dual=2.38163816E-5*θCMB^4/h^2`: cosmological density of relativistic species.
 - `Ωr::Dual=Ωg*(1.0 + N_ν * (7.0/8.0) * (4.0/11.0)^(4.0/3.0))`: cosmological radiation density.
 
-Returns:
+# Fields
 
-```
-mutable struct CosmoPar{T}
-    Ωm::T
-    Ωb::T
-    h::T
-    ns::T
-    As::T
-    σ8::T
-    θCMB::T
-    Y_p::T
-    N_ν::T
-    Σm_ν::T
-    Ωg::T
-    Ωr::T
-    Ωc::T
-    ΩΛ::T
-end     
-``` 
+$(FIELDS)
 """
 mutable struct CosmoPar{T}
     Ωm::T
@@ -190,6 +151,7 @@ struct Cosmology
     cpar::CosmoPar
     chi::AbstractInterpolation
     z_of_chi::AbstractInterpolation
+    t_of_z::AbstractInterpolation
     chi_max
     chi_LSS
     Dz::AbstractInterpolation
@@ -211,35 +173,21 @@ expansion history.
 
 Depending on the choice of transfer function in the settings, \
 the primordial power spectrum is calculated using: 
-- `tk_mode = "EisHu"` : the Eisenstein & Hu formula (arXiv:astro-ph/9710252)
-- `tk_mode = "emupk"` : the Mootoovaloo et al 2021 emulator `EmuPk` (arXiv:2105.02256v2)
-- `tk_mode = "Bolt"` : the full differentiable Boltzmann code `Bolt.jl` 
+- `tk_mode = :EisHu` : the Eisenstein & Hu formula (arXiv:astro-ph/9710252)
+- `tk_mode = :EmuPk` : the Mootoovaloo et al 2021 emulator `EmuPk` (arXiv:2105.02256v2) 
 
 Depending on the choice of power spectrum mode in the settings, \
 the matter power spectrum is either: 
-- `Pk_mode = "linear"` : the linear matter power spectrum.
-- `Pk_mode = "halofit"` : the Halofit non-linear matter power spectrum (arXiv:astro-ph/0207664).
+- `Pk_mode = :linear` : the linear matter power spectrum.
+- `Pk_mode = :halofit` : the Halofit non-linear matter power spectrum (arXiv:astro-ph/0207664).
 
 Arguments:
 - `Settings::MutableStructure` : cosmology constructure settings. 
 - `CosmoPar::Structure` : cosmological parameters.
 
-Returns:
+# Fields
 
-```
-mutable struct Cosmology
-    settings::Settings
-    cpar::CosmoPar
-    chi::AbstractInterpolation
-    z_of_chi::AbstractInterpolation
-    chi_max
-    chi_LSS
-    Dz::AbstractInterpolation
-    fs8z::AbstractInterpolation
-    PkLz0::AbstractInterpolation
-    Pk::AbstractInterpolation
-end     
-``` 
+$(FIELDS)
 """
 Cosmology(cpar::CosmoPar, settings::Settings; kwargs...) = begin
     # Load settings
@@ -251,16 +199,20 @@ Cosmology(cpar::CosmoPar, settings::Settings; kwargs...) = begin
     dlogk = settings.dlogk
     pk0, pki = lin_Pk0(cpar, settings; kwargs...)
     # Compute redshift-distance relation
-    norm = CLIGHT_HMPC / cpar.h
     chis = zeros(cosmo_type, nz_chi)
+    ts = zeros(cosmo_type, nz_chi)
     for i in 1:nz_chi
         zz = zs_chi[i]
-        chis[i] = quadgk(z -> 1.0/_Ez(cpar, z), 0.0, zz, rtol=1E-5)[1] * norm
+        chis[i] = quadgk(z -> 1.0/Ez(cpar, z), 0.0, zz, rtol=1E-5)[1]
+        chis[i] *= CLIGHT_HMPC / cpar.h
+        ts[i] = quadgk(z -> 1.0/((1+z)*Ez(cpar, z)), 0.0, zz, rtol=1E-5)[1]
+        ts[i] *= cpar.h*(18.356164383561644*10^9)
     end
     # Distance to LSS
     chi_LSS = chis[end]
     # OPT: tolerances, interpolation method
     chii = linear_interpolation(zs_chi, Vector(chis), extrapolation_bc=Line())
+    ti = linear_interpolation(zs_chi, Vector(ts), extrapolation_bc=Line())
     zi = linear_interpolation(chis, Vector(zs_chi), extrapolation_bc=Line())
     Dzs, Dzi, fs8zi = get_growth(cpar, settings; kwargs...)
 
@@ -274,7 +226,7 @@ Cosmology(cpar::CosmoPar, settings::Settings; kwargs...) = begin
     else 
         @error("Pk mode not implemented")
     end
-    Cosmology(settings, cpar, chii, zi, chis[end],
+    Cosmology(settings, cpar, chii, zi, ti, chis[end],
               chi_LSS, Dzi, fs8zi, pki, Pki)
 end
 
@@ -309,7 +261,7 @@ Cosmology(;kwargs...) = begin
     Cosmology(cpar, settings)
 end
 
-function _Ez(cpar::CosmoPar, z)
+function Ez(cpar::CosmoPar, z)
     E2 = @. (cpar.Ωm*(1+z)^3+cpar.Ωr*(1+z)^4+cpar.ΩΛ)
     return sqrt.(E2)
 end
@@ -332,6 +284,23 @@ function chi_to_z(cosmo::Cosmology, chi)
 end
 
 """
+    z_to_t(cosmo::Cosmology, z)
+
+Given a `Cosmology` instance, converts from redshift to years.  
+
+Arguments:
+- `cosmo::Cosmology` : cosmology structure
+- `z::Dual` : redshift
+
+Returns:
+- `t::Dual` : years
+
+"""
+function z_to_t(cosmo::Cosmology, z)
+    return cosmo.t_of_z(z)
+end
+
+"""
     Ez(cosmo::Cosmology, z)
 
 Given a `Cosmology` instance, it returns the expansion rate (H(z)/H0). 
@@ -344,7 +313,7 @@ Returns:
 - `Ez::Dual` : expansion rate 
 
 """
-Ez(cosmo::Cosmology, z) = _Ez(cosmo.cpar, z)
+Ez(cosmo::Cosmology, z) = Ez(cosmo.cpar, z)
 
 """
     Hmpc(cosmo::Cosmology, z)

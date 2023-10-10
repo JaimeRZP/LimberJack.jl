@@ -1,5 +1,5 @@
 function _dgrowth!(dd, d, cosmo::CosmoPar, a)
-    ez = _Ez(cosmo, 1.0/a-1.0)
+    ez = Ez(cosmo, 1.0/a-1.0)
     dd[1] = d[2] * 1.5 * cosmo.Ωm / (a^2*ez)
     dd[2] = d[1] / (a^3*ez)
 end
@@ -14,7 +14,7 @@ function get_growth(mode::Val{:RK2}, cpar::CosmoPar, settings::Settings; kwargs.
     dx = x[2]-x[1]
     
     aa = reverse(a)
-    e = _Ez(cpar, z)
+    e = Ez(cpar, z)
     ee = reverse(e)
     dd = zeros(settings.cosmo_type, settings.nz)
     yy = zeros(settings.cosmo_type, settings.nz)
@@ -58,7 +58,7 @@ end
 function _get_growth(mode::Val{:OrdDiffEq}, cpar::CosmoPar, settings::Settings; kwargs...)
         z_ini = 1000.0
         a_ini = 1.0/(1.0+z_ini)
-        ez_ini = _Ez(cpar, z_ini)
+        ez_ini = Ez(cpar, z_ini)
         d0 = [a_ini^3*ez_ini, a_ini]
         a_s = reverse(@. 1.0 / (1.0 + zs))
         prob = ODEProblem(_dgrowth!, d0, (a_ini, 1.0), cpar)
