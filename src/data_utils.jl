@@ -25,22 +25,12 @@ function _get_spin(sacc_file, tracer_name)
     return spin
 end 
 
-function _get_cl_name(s, t1, t2)
-    spin1 = _get_spin(s, t1)
-    spin2 = _get_spin(s, t2)
-    cl_name = string("cl_", spin1 , spin2)
-    if cl_name == "cl_e0"
-        cl_name = "cl_0e"
-    end
-    return cl_name 
-end
-
 function _apply_scale_cuts(s, yaml_file)
     indices = Vector{Int}([])
     for cl in yaml_file["order"]
         t1, t2 = cl["tracers"]
         lmin, lmax = cl["ell_cuts"]
-        cl_name = _get_cl_name(s, t1, t2)
+        cl_name = cl["cl_name"]
         ind = s.indices(cl_name, (t1, t2),
                         ell__gt=lmin, ell__lt=lmax)
         append!(indices, pyconvert(Vector{Int}, ind))
@@ -87,7 +77,7 @@ function make_data(sacc_file, yaml_file; nzs_path="")
     pairs = []
     for cl in yaml_file["order"]
         t1, t2 = cl["tracers"]
-        cl_name = _get_cl_name(s, t1, t2)
+        cl_name = cl["cl_name"]
         l, c_ell, ind = s.get_ell_cl(cl_name, string(t1), string(t2),
                                      return_cov=false, return_ind=true)
         append!(indices, pyconvert(Vector{Int}, ind))
