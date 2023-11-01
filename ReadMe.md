@@ -38,10 +38,8 @@ In order to run ```LimberJack.jl``` you will need ```Julia-1.7.0``` or newer ins
 Older versions of ```Julia``` might be compatible but haven't been tested.
 You can find instructions on how to install ```Julia``` here: https://julialang.org/downloads/.
 
-Once you have installed ```Julia``` you can install ```LimberJack.jl``` following these steps:
-1. Clone the git repository
-2. From the repository directory open ```Julia```
-3. In the ```Julia``` command line run:
+Once you have installed ```Julia```  installing ``LimberJack.jl```  is as easy as:
+1. In the ```Julia``` command line run:
 ``` julia
     using Pkg
     Pkg.add("LimberJack")
