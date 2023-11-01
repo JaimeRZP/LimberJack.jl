@@ -262,7 +262,7 @@ Cosmology(cpar::CosmoPar, settings::Settings; kwargs...) = begin
     # Distance to LSS
     chi_LSS = chis[end]
     # OPT: tolerances, interpolation method
-    chii = cubic_spline_interpolation(zs, chis, extrapolation_bc=Line())
+    chii = linear_interpolation(zs, chis, extrapolation_bc=Line())
     zi = linear_interpolation(chis, zs, extrapolation_bc=Line())
     ti = linear_interpolation(zs_chi, ts, extrapolation_bc=Line())
     Dzs, Dzi, fs8zi = get_growth(cpar, settings; kwargs...)
