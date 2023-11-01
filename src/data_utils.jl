@@ -122,7 +122,7 @@ function make_data(sacc_file, yaml_file; nzs_path="")
                     merge!(files, Dict(string("nz_", name)=>[z, nz]))
                 end
             else
-                nzs = npzread(nzs_path+string("nz_", name)+".npz")
+                nzs = npzread(string(nzs_path, "nz_", name, ".npz"))
                 z = nzs["z"]
                 dndz = nzs["dndz"]
                 merge!(files, Dict(string("nz_", name)=>[z, nz]))
