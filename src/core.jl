@@ -64,15 +64,16 @@ mutable struct Settings
 end
 
 function Settings(;kwargs...)
+    z_max = get(kwargs, :z_max, 1100)
     nz = get(kwargs, :nz, 300)
     nz_chi = get(kwargs, :nz_chi, 1000)
     nz_t = get(kwargs, :nz_t, 350)
     nk = get(kwargs, :nk, 500)
     nℓ = get(kwargs, :nℓ, 300)
 
-    xs = LinRange(0, log(1+1100), nz)
+    xs = LinRange(0, log(1+z_max), nz)
     zs = @.(exp(xs) - 1)
-    zs_chi = 10 .^ Vector(LinRange(-3, log10(1100), nz_chi))
+    zs_chi = 10 .^ Vector(LinRange(-3, log10(z_max), nz_chi))
     zs_t = range(0.00001, stop=3.0, length=nz_t)
     logk = range(log(0.0001), stop=log(100.0), length=nk)
     ks = exp.(logk)
