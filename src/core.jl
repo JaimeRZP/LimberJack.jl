@@ -83,11 +83,17 @@ Settings(;kwargs...) = begin
     ℓs = range(0, stop=2000, length=nℓ)
 
     using_As = get(kwargs, :using_As, false)
-
     cosmo_type = get(kwargs, :cosmo_type, Float64)
     tk_mode = get(kwargs, :tk_mode, :EisHu)
     Dz_mode = get(kwargs, :Dz_mode, :RK2)
     Pk_mode = get(kwargs, :Pk_mode, :linear)
+
+    if using_As && (tk_mode == :EisHu)
+        @warn "Using As with the EisensteinHu transfer function is not possible."
+        @warn "Using σ8 instead."
+        using_As = false
+    end   
+
     Settings(nz, nz_chi, nz_t, nk, nℓ,
              xs, zs, zs_chi, zs_t, ks, ℓs, logk,  dlogk,
              using_As,
@@ -161,7 +167,7 @@ CosmoPar(;kwargs...) = begin
     ns = get(kwargs, :ns, 0.96)
     As = get(kwargs, :As, 2.097e-9)
     σ8 = get(kwargs, :σ8, 0.81)
-    cosmo_type = eltype([Ωm, Ωb, h, ns, σ8])
+    cosmo_type = eltype([Ωm, Ωb, h, ns, As, σ8])
 
     Y_p = get(kwargs, :Y_p, 0.24)  # primordial helium fraction
     N_ν = get(kwargs, :N_ν, 3.046) # effective number of relativisic species (PDG25 value)
@@ -292,7 +298,6 @@ Returns:
 
 """
 Cosmology(;kwargs...) = begin
-
     kwargs=Dict(kwargs)
     if :As ∈ keys(kwargs)
         using_As = true
@@ -303,12 +308,7 @@ Cosmology(;kwargs...) = begin
     cosmo_type = _get_cosmo_type(cpar)
     settings = Settings(;cosmo_type=cosmo_type,
                          using_As=using_As,
-                         kwargs...)
-    if using_As && (settings.tk_mode == "BBKS" || settings.tk_mode == "EisensteinHu")
-        @warn "Using As with BBKS or EisensteinHu transfer function is not possible."
-        @warn "Using σ8 instead."
-        using_As = false
-    end                     
+                         kwargs...)                  
     Cosmology(cpar, settings)
 end
 
