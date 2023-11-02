@@ -8,6 +8,7 @@ get_growth(mode::Symbol, cpar::CosmoPar, settings::Settings; kwargs...) = get_gr
 get_growth(@nospecialize(mode), cpar::CosmoPar, settings::Settings; kwargs...) = error("Dz mode $(typeof(i)) not supported.")
 
 function get_growth(mode::Val{:RK2}, cpar::CosmoPar, settings::Settings; kwargs...)
+    cosmo_type = _get_cosmo_type(cpar)
     x = settings.xs
     z = settings.zs
     a = @.(1/(1+z))
@@ -16,8 +17,8 @@ function get_growth(mode::Val{:RK2}, cpar::CosmoPar, settings::Settings; kwargs.
     aa = reverse(a)
     e = Ez(cpar, z)
     ee = reverse(e)
-    dd = zeros(settings.cosmo_type, settings.nz)
-    yy = zeros(settings.cosmo_type, settings.nz)
+    dd = zeros(cosmo_type, settings.nz)
+    yy = zeros(cosmo_type, settings.nz)
     dd[1] = aa[1]
     yy[1] = aa[1]^3*ee[end]
     

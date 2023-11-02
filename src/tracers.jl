@@ -27,7 +27,7 @@ Kwargs:
 Returns:
 - `NumberCountsTracer::NumberCountsTracer` : Number counts tracer structure.
 """
-NumberCountsTracer(cosmo::Cosmology, z_n, nz; b=1.0) = begin
+function NumberCountsTracer(cosmo::Cosmology, z_n, nz; b=1.0)
     nz_int = linear_interpolation(z_n, nz, extrapolation_bc=0)
     res = cosmo.settings.nz_t
     z_w = range(0.00001, stop=z_n[end], length=res)
@@ -40,7 +40,7 @@ NumberCountsTracer(cosmo::Cosmology, z_n, nz; b=1.0) = begin
     w_arr = @. (nz_w*hz/nz_norm)
     wint = linear_interpolation(chi, b .* w_arr, extrapolation_bc=Line())
     F::Function = ℓ -> 1
-    NumberCountsTracer(wint, F)
+    return NumberCountsTracer(wint, F)
 end
 
 """
@@ -62,10 +62,9 @@ struct WeakLensingTracer <: Tracer
     F::Function
 end
 
-WeakLensingTracer(cosmo::Cosmology, z_n, nz; IA_params = [0.0, 0.0], m=0.0, kwargs...) = begin
+function WeakLensingTracer(cosmo::Cosmology, z_n, nz; IA_params = [0.0, 0.0], m=0.0, kwargs...)
     nz_int = linear_interpolation(z_n, nz, extrapolation_bc=0) 
-    cosmo_type = cosmo.settings.cosmo_type
-    res =cosmo.settings.nz_t
+    res = cosmo.settings.nz_t
     z_w = range(0.00001, stop=z_n[end], length=res)
     dz_w = (z_w[end]-z_w[1])/res
     nz_w = nz_int(z_w)
@@ -79,7 +78,7 @@ WeakLensingTracer(cosmo::Cosmology, z_n, nz; IA_params = [0.0, 0.0], m=0.0, kwar
     #      at all zs.
     # Calculate integral at each chi
     w_itg(chii) = @.(nz_w*(1-chii/chi))
-    w_arr = zeros(cosmo_type, res)
+    w_arr = zeros(cosmo.cosmo_type, res)
     @inbounds for i in 1:res-3
         w_arr[i] = integrate(z_w[i:res], w_itg(chi[i])[i:res], SimpsonEven())
     end
@@ -102,7 +101,7 @@ WeakLensingTracer(cosmo::Cosmology, z_n, nz; IA_params = [0.0, 0.0], m=0.0, kwar
     b = m+1.0
     wint = linear_interpolation(chi, b.*w_arr, extrapolation_bc=Line())
     F::Function = ℓ -> @.(sqrt((ℓ+2)*(ℓ+1)*ℓ*(ℓ-1))/(ℓ+0.5)^2)
-    WeakLensingTracer(wint, F)
+    return WeakLensingTracer(wint, F)
 end
 
 """
@@ -127,7 +126,7 @@ Arguments:
 Returns:
 - `CMBLensingTracer::CMBLensingTracer` : CMB lensing tracer structure.
 """
-CMBLensingTracer(cosmo::Cosmology) = begin
+function CMBLensingTracer(cosmo::Cosmology)
     # chi array
     chis = range(0.0, stop=cosmo.chi_max, length=cosmo.settings.nz_t)
     zs = cosmo.z_of_chi(chis)
@@ -140,7 +139,7 @@ CMBLensingTracer(cosmo::Cosmology) = begin
     # Interpolate
     wint = linear_interpolation(chis, w_arr, extrapolation_bc=0.0)
     F::Function = ℓ -> @.(((ℓ+1)*ℓ)/(ℓ+0.5)^2) 
-    CMBLensingTracer(wint, F)
+    return CMBLensingTracer(wint, F)
 end
 
 """

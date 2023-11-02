@@ -15,7 +15,7 @@ function Cℓintegrand(cosmo::Cosmology,
                      t2::AbstractInterpolation,
                      ℓ::Number)
     sett = cosmo.settings
-    chis = zeros(sett.cosmo_type, sett.nk)
+    chis = zeros(cosmo.cosmo_type, sett.nk)
     chis[1:sett.nk] = (ℓ+0.5) ./ sett.ks
     chis .*= (chis .< cosmo.chi_max)
     z = cosmo.z_of_chi(chis)
