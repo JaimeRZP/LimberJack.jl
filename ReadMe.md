@@ -41,12 +41,9 @@ Older versions of ```Julia``` might be compatible but haven't been tested.
 You can find instructions on how to install ```Julia``` here: https://julialang.org/downloads/.
 
 Once you have installed ```Julia``` you can install ```LimberJack.jl``` following these steps:
-1. Clone the git repository
-2. From the repository directory open ```Julia```
-3. In the ```Julia``` command line run:
 ``` julia
     using Pkg
-    Pkg.add(path=".")
+    Pkg.add("LimberJack")
 ```
 ### Installing Sacc.py in Julia
 
