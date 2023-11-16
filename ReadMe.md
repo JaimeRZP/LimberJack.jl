@@ -79,3 +79,10 @@ Once you have installed ```Julia``` you can install ```LimberJack.jl``` followin
 1.  **Parallelization**: the current threading parallelization of ```LimberJack.jl``` is far away from the optimal one over number of threads scaling. Future works could study alternative parallalization schemes or  possible inneficiencies in the code. 
 2. **GPU's**: ```LimberJack.jl``` currently cannot run on GPU's which are known to significantly speed-up cosmological inference. Future works could study implementing ```Julia``` GPU libraries such as ```CUDA.jl```.
 3. **Backwards-AD**: currently ```LimberJack.jl```'s preferred AD mode is forward-AD. However, the key computation of cosmological inference, obtaining the $\chi^2$, is a map from N parameters to a scalar. For a large number of parameters, backwards-AD is in theory the preferred AD mode and should significantly speed up the computation of the gradient. Future works could look into making ```LimberJack.jl``` compatible with the latest ```Julia``` AD libraries such as ```Zygote.jl``` to implement efficient backwards-AD.
+
+## Contributors
+| | | | | | | |
+|:-------------------------:|:-------------------------:|:-------------------------:|:-------------------------:|:-------------------------:|:-------------------------:|:-------------------------:|
+| <img src=https://github.com/jaimerzp.png  width="100" height="100" /> | <img src=https://github.com/anicola.png  width="100" height="100" /> | <img src=https://github.com/carlosggarcia.png  width="100" height="100" /> |<img src=https://github.com/damonge.png  width="100" height="100" />| <img src=https://github.com/harry45.png  width="100" height="100" /> | <img src=https://github.com/jmsull.png  width="100" height="100" /> |  <img src=https://github.com/marcobonici.png  width="100" height="100" /> |
+| Jaime Ruiz-Zapatero | Andrina Nicola | Carlos Garcia-garcia| David Alonso | Arrykrishna Mootoovaloo | Jamie Sullivan | Marco Bonici |
+| Lead | Halofit | Validation | Tracers | EmuPk | Bolt.jl | Benchmarks |
