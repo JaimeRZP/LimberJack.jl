@@ -86,3 +86,25 @@ Once you have installed ```Julia``` you can install ```LimberJack.jl``` followin
 | <img src=https://github.com/jaimerzp.png  width="100" height="100" /> | <img src=https://github.com/anicola.png  width="100" height="100" /> | <img src=https://github.com/carlosggarcia.png  width="100" height="100" /> |<img src=https://github.com/damonge.png  width="100" height="100" />| <img src=https://github.com/harry45.png  width="100" height="100" /> | <img src=https://github.com/jmsull.png  width="100" height="100" /> |  <img src=https://github.com/marcobonici.png  width="100" height="100" /> |
 | Jaime Ruiz-Zapatero | Andrina Nicola | Carlos Garcia-garcia| David Alonso | Arrykrishna Mootoovaloo | Jamie Sullivan | Marco Bonici |
 | Lead | Halofit | Validation | Tracers | EmuPk | Bolt.jl | Benchmarks |
+
+
+## Citing LimberJack
+
+```
+@ARTICLE{2023arXiv231008306R,
+       author = {{Ruiz-Zapatero}, J. and {Alonso}, D. and {Garc{\'\i}a-Garc{\'\i}a}, C. and {Nicola}, A. and {Mootoovaloo}, A. and {Sullivan}, J.~M. and {Bonici}, M. and {Ferreira}, P.~G.},
+        title = "{LimberJack.jl: auto-differentiable methods for angular power spectra analyses}",
+      journal = {arXiv e-prints},
+     keywords = {Astrophysics - Cosmology and Nongalactic Astrophysics, Astrophysics - Instrumentation and Methods for Astrophysics},
+         year = 2023,
+        month = oct,
+          eid = {arXiv:2310.08306},
+        pages = {arXiv:2310.08306},
+          doi = {10.48550/arXiv.2310.08306},
+archivePrefix = {arXiv},
+       eprint = {2310.08306},
+ primaryClass = {astro-ph.CO},
+       adsurl = {https://ui.adsabs.harvard.edu/abs/2023arXiv231008306R},
+      adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+```
