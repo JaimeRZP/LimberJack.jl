@@ -11,7 +11,6 @@ Kwargs:
 - `nk::Int=500`: number of nodes in the k-scale array used to compute matter power spectrum grid.
 - `nℓ::Int=300`: number of nodes in the multipoles array.
 - `using_As::Bool=false`: `True` if using the `As` parameter.
-- `cosmo_type::Type=Float64` : type of cosmological parameters. 
 - `tk_mode::String=:EisHu` : choice of transfer function.
 - `Dz_mode::String=:RK2` : choice of method to compute the linear growth factor.
 - `Pk_mode::String=:linear` : choice of method to apply non-linear corrections to the matter power spectrum.
@@ -59,23 +58,22 @@ mutable struct Settings
     dlogk
 
     using_As::Bool
-
-    cosmo_type::DataType
     tk_mode::Symbol
     Dz_mode::Symbol
     Pk_mode::Symbol
 end
 
-Settings(;kwargs...) = begin
+function Settings(;kwargs...)
+    z_max = get(kwargs, :z_max, 1100)
     nz = get(kwargs, :nz, 300)
     nz_chi = get(kwargs, :nz_chi, 1000)
     nz_t = get(kwargs, :nz_t, 350)
     nk = get(kwargs, :nk, 500)
     nℓ = get(kwargs, :nℓ, 300)
 
-    xs = LinRange(0, log(1+1100), nz)
+    xs = LinRange(0, log(1+z_max), nz)
     zs = @.(exp(xs) - 1)
-    zs_chi = 10 .^ Vector(LinRange(-3, log10(1100), nz_chi))
+    zs_chi = 10 .^ Vector(LinRange(-3, log10(z_max), nz_chi))
     zs_t = range(0.00001, stop=3.0, length=nz_t)
     logk = range(log(0.0001), stop=log(100.0), length=nk)
     ks = exp.(logk)
@@ -83,15 +81,20 @@ Settings(;kwargs...) = begin
     ℓs = range(0, stop=2000, length=nℓ)
 
     using_As = get(kwargs, :using_As, false)
-
-    cosmo_type = get(kwargs, :cosmo_type, Float64)
     tk_mode = get(kwargs, :tk_mode, :EisHu)
     Dz_mode = get(kwargs, :Dz_mode, :RK2)
     Pk_mode = get(kwargs, :Pk_mode, :linear)
-    Settings(nz, nz_chi, nz_t, nk, nℓ,
-             xs, zs, zs_chi, zs_t, ks, ℓs, logk,  dlogk,
-             using_As,
-             cosmo_type, tk_mode, Dz_mode, Pk_mode)
+
+    if using_As && (tk_mode == :EisHu)
+        @warn "Using As with the EisensteinHu transfer function is not possible."
+        @warn "Using σ8 instead."
+        using_As = false
+    end   
+
+    return Settings(nz, nz_chi, nz_t, nk, nℓ,
+        xs, zs, zs_chi, zs_t, ks, ℓs, logk,  dlogk,
+        using_As,
+        tk_mode, Dz_mode, Pk_mode)
 end
 
 """
@@ -152,7 +155,7 @@ mutable struct CosmoPar{T}
     ΩΛ::T
 end
 
-CosmoPar(;kwargs...) = begin
+function CosmoPar(;kwargs...)
     kwargs = Dict(kwargs)
 
     Ωm = get(kwargs, :Ωm, 0.3)
@@ -161,7 +164,7 @@ CosmoPar(;kwargs...) = begin
     ns = get(kwargs, :ns, 0.96)
     As = get(kwargs, :As, 2.097e-9)
     σ8 = get(kwargs, :σ8, 0.81)
-    cosmo_type = eltype([Ωm, Ωb, h, ns, σ8])
+    cosmo_type = eltype([Ωm, Ωb, h, ns, As, σ8])
 
     Y_p = get(kwargs, :Y_p, 0.24)  # primordial helium fraction
     N_ν = get(kwargs, :N_ν, 3.046) # effective number of relativisic species (PDG25 value)
@@ -173,9 +176,9 @@ CosmoPar(;kwargs...) = begin
     Ωr = get(kwargs, :Ωr, Ωg*f_rel)
     Ωc = Ωm-Ωb
     ΩΛ = 1-Ωm-Ωr
-    CosmoPar{cosmo_type}(Ωm, Ωb, h, ns, As, σ8,
-                         θCMB, Y_p, N_ν, Σm_ν,
-                         Ωg, Ωr, Ωc, ΩΛ)
+    return CosmoPar{cosmo_type}(Ωm, Ωb, h, ns, As, σ8,
+        θCMB, Y_p, N_ν, Σm_ν,
+        Ωg, Ωr, Ωc, ΩΛ)
 end
 
 
@@ -183,9 +186,10 @@ function _get_cosmo_type(x::CosmoPar{T}) where{T}
     return T
 end
 
-struct Cosmology
+mutable struct Cosmology
     settings::Settings
     cpar::CosmoPar
+    cosmo_type::DataType
     chi::AbstractInterpolation
     z_of_chi::AbstractInterpolation
     t_of_z::AbstractInterpolation
@@ -240,9 +244,9 @@ mutable struct Cosmology
 end     
 ``` 
 """
-Cosmology(cpar::CosmoPar, settings::Settings; kwargs...) = begin
+function Cosmology(cpar::CosmoPar, settings::Settings; kwargs...)
     # Load settings
-    cosmo_type = settings.cosmo_type
+    cosmo_type = _get_cosmo_type(cpar)
     zs_chi, nz_chi = settings.zs_chi, settings.nz_chi
     zs, nz = settings.zs, settings.nz
     logk, nk = settings.logk, settings.nk
@@ -264,7 +268,7 @@ Cosmology(cpar::CosmoPar, settings::Settings; kwargs...) = begin
     # OPT: tolerances, interpolation method
     chii = linear_interpolation(zs_chi, Vector(chis), extrapolation_bc=Line())
     ti = linear_interpolation(zs_chi, Vector(ts), extrapolation_bc=Line())
-    zi = linear_interpolation(chis, Vector(zs_chi), extrapolation_bc=Line())
+    zi = linear_interpolation(Vector(chis), Vector(zs_chi), extrapolation_bc=Line())
     Dzs, Dzi, fs8zi = get_growth(cpar, settings; kwargs...)
 
     if settings.Pk_mode == :linear
@@ -272,13 +276,23 @@ Cosmology(cpar::CosmoPar, settings::Settings; kwargs...) = begin
         Pki = linear_interpolation((logk, zs), log.(Pks);
                                    extrapolation_bc=Line())
     elseif settings.Pk_mode == :Halofit
-        Pki = get_PKnonlin(cpar, zs, ks, pk0, Dzs;
-                          cosmo_type=cosmo_type)
+        Pki = get_PKnonlin(cpar, zs, ks, pk0, Dzs)
     else 
         @error("Pk mode not implemented")
     end
-    Cosmology(settings, cpar, chii, zi, ti, chis[end],
-              chi_LSS, Dzi, fs8zi, pki, Pki)
+    return Cosmology(
+        settings,
+        cpar,
+        cosmo_type,
+        chii,
+        zi,
+        ti,
+        chis[end],
+        chi_LSS,
+        Dzi,
+        fs8zi,
+        pki,
+        Pki)
 end
 
 """
@@ -291,8 +305,7 @@ Returns:
 - `Cosmology` : cosmology structure.
 
 """
-Cosmology(;kwargs...) = begin
-
+function Cosmology(;kwargs...)
     kwargs=Dict(kwargs)
     if :As ∈ keys(kwargs)
         using_As = true
@@ -300,16 +313,8 @@ Cosmology(;kwargs...) = begin
         using_As = false
     end     
     cpar = CosmoPar(;kwargs...)
-    cosmo_type = _get_cosmo_type(cpar)
-    settings = Settings(;cosmo_type=cosmo_type,
-                         using_As=using_As,
-                         kwargs...)
-    if using_As && (settings.tk_mode == "BBKS" || settings.tk_mode == "EisensteinHu")
-        @warn "Using As with BBKS or EisensteinHu transfer function is not possible."
-        @warn "Using σ8 instead."
-        using_As = false
-    end                     
-    Cosmology(cpar, settings)
+    settings = Settings(; using_As=using_As, kwargs...)                  
+    return Cosmology(cpar, settings)
 end
 
 function Ez(cpar::CosmoPar, z)

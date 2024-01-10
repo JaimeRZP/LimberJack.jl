@@ -24,7 +24,8 @@ function _get_σ2(lks, ks, pks, R, kind)
     return integral
 end
 
-function get_PKnonlin(cpar::CosmoPar, z, k, PkLz0, Dzs; cosmo_type::DataType=Real)
+function get_PKnonlin(cpar::CosmoPar, z, k, PkLz0, Dzs)
+    cosmo_type = _get_cosmo_type(cpar)
     nk = length(k)
     nz = length(z)
     logk = log.(k)

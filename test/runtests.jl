@@ -692,7 +692,7 @@ if test_main
             
             function bias(p::T)::Array{T,1} where T<:Real
                 cosmo = Cosmology(tk_mode=:EisHu, Pk_mode=:Halofit)
-                cosmo.settings.cosmo_type = typeof(p)
+                cosmo.cosmo_type = typeof(p)
                 z = Vector(range(0., stop=2., length=1000))
                 nz = Vector(@. exp(-0.5*((z-0.5)/0.05)^2))
                 tg = NumberCountsTracer(cosmo, z, nz; b=p)
@@ -703,7 +703,7 @@ if test_main
             
             function dz(p::T)::Array{T,1} where T<:Real
                 cosmo = Cosmology(tk_mode=:EisHu, Pk_mode=:Halofit, nz=300)
-                cosmo.settings.cosmo_type = typeof(p)
+                cosmo.cosmo_type = typeof(p)
                 z = Vector(range(0., stop=2., length=1000)) .- p
                 nz = Vector(@. exp(-0.5*((z-0.5)/0.05)^2))
                 tg = NumberCountsTracer(cosmo, z, nz; b=1)
@@ -714,7 +714,7 @@ if test_main
             
             function mbias(p::T)::Array{T,1} where T<:Real
                 cosmo = Cosmology(tk_mode=:EisHu, Pk_mode=:Halofit)
-                cosmo.settings.cosmo_type = typeof(p)
+                cosmo.cosmo_type = typeof(p)
                 z = range(0., stop=2., length=256)
                 nz = @. exp(-0.5*((z-0.5)/0.05)^2)
                 ts = WeakLensingTracer(cosmo, z, nz; m=p, IA_params=[0.0, 0.0])
@@ -725,7 +725,7 @@ if test_main
             
             function IA_A(p::T)::Array{T,1} where T<:Real
                 cosmo = Cosmology(tk_mode=:EisHu, Pk_mode=:Halofit, )
-                cosmo.settings.cosmo_type = typeof(p)
+                cosmo.cosmo_type = typeof(p)
                 z = range(0., stop=2., length=256)
                 nz = @. exp(-0.5*((z-0.5)/0.05)^2)
                 ts = WeakLensingTracer(cosmo, z, nz; m=2, IA_params=[p, 0.1])
@@ -736,7 +736,7 @@ if test_main
             
             function IA_alpha(p::T)::Array{T,1} where T<:Real
                 cosmo = Cosmology(tk_mode=:EisHu, Pk_mode=:Halofit)
-                cosmo.settings.cosmo_type = typeof(p)
+                cosmo.cosmo_type = typeof(p)
                 z = range(0., stop=2., length=256)
                 nz = @. exp(-0.5*((z-0.5)/0.05)^2)
                 ts = WeakLensingTracer(cosmo, z, nz; m=2, IA_params=[0.3, p])

@@ -100,7 +100,7 @@ function _inv_y_transformation(emulator::Emulator, point)
 end
 
 function lin_Pk0(mode::Val{:EmuPk}, cpar::CosmoPar, settings::Settings)
-    cosmotype = settings.cosmo_type
+    cosmo_type = _get_cosmo_type(cpar)
     wc = cpar.Ωc*cpar.h^2
     wb = cpar.Ωb*cpar.h^2
     ln1010As = log((10^10)*cpar.As)
@@ -109,7 +109,7 @@ function lin_Pk0(mode::Val{:EmuPk}, cpar::CosmoPar, settings::Settings)
     
     lks_emul = emulator.training_karr
     nk = length(lks_emul)
-    pk0s_t = zeros(cosmotype, nk)
+    pk0s_t = zeros(cosmo_type, nk)
     @inbounds for i in 1:nk
         kernel = _get_kernel(emulator.trans_cosmos, params_t, emulator.hypers[i, :])
         pk0s_t[i] = dot(vec(kernel), vec(emulator.alphas[i,:]))
@@ -135,7 +135,7 @@ function lin_Pk0(mode::Val{:Custom}, cpar::CosmoPar, settings::Settings; kwargs.
 end
 
 lin_Pk0(mode::Symbol, cpar::CosmoPar, settings::Settings; kwargs...) = lin_Pk0(Val(mode), cpar, settings; kwargs...)
-lin_Pk0(@nospecialize(mode), cpar::CosmoPar, settings::Settings; kwargs...) = error("Tk mode $(typeof(i)) not supported.")
+lin_Pk0(@nospecialize(mode), cpar::CosmoPar, settings::Settings; kwargs...) = error("Tk mode $(typeof(mode)) not supported.")
 
 function _get_kernel(arr1, arr2, hyper)
     arr1_w = @.(arr1/exp(hyper[2:6]))
