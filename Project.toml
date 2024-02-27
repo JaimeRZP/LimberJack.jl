@@ -1,7 +1,7 @@
 name = "LimberJack"
 uuid = "6b86205d-155a-4b14-b82d-b6a149ea78f2"
 authors = ["Jaime Ruiz-Zapatero <jaimerz011235812@gmail.com>", "David Alonso", "Andrina Nicola", "Arrykrishna Mootoovaloo", "James Sullivan", "Marco Bonic"]
-version = "0.1.31"
+version = "0.1.4"
 
 [deps]
 Artifacts = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
