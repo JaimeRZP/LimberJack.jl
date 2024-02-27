@@ -1,4 +1,4 @@
-struct Instructions
+struct Meta
     names
     pairs
     types
@@ -25,12 +25,22 @@ function _get_spin(sacc_file, tracer_name)
     return spin
 end 
 
+function _get_cl_name(s, t1, t2)
+    spin1 = _get_spin(s, t1)
+    spin2 = _get_spin(s, t2)
+    cl_name = string("cl_", spin1 , spin2)
+    if cl_name == "cl_e0"
+        cl_name = "cl_0e"
+    end
+    return cl_name 
+end
+
 function _apply_scale_cuts(s, yaml_file)
     indices = Vector{Int}([])
     for cl in yaml_file["order"]
         t1, t2 = cl["tracers"]
         lmin, lmax = cl["ell_cuts"]
-        cl_name = cl["cl_name"]
+        cl_name = _get_cl_name(s, t1, t2)
         ind = s.indices(cl_name, (t1, t2),
                         ell__gt=lmin, ell__lt=lmax)
         append!(indices, pyconvert(Vector{Int}, ind))
@@ -39,34 +49,11 @@ function _apply_scale_cuts(s, yaml_file)
     return s
 end
 
+function make_data(sacc_file, yaml_file; kwargs...)
 
-"""
-    make_data(sacc_file, yaml_file)
+    kwargs=Dict(kwargs)
+    kwargs_keys = [string(i) for i in collect(keys(kwargs))]
 
-Process `sacc` and `yaml` files into a `Meta` structure \
-containing the instructions of how to compose the theory \
-vector and a `npz` file with the neccesary redshift distributions \
-of the tracers involved. 
-
-Arguments:
-- `sacc_file` : sacc file
-- `yaml_file` : yaml_file
-
-Returns:
-```
-struct Instructions
-    names : names of tracers.
-    pairs : pairs of tracers to compute angular spectra for.
-    types : types of the tracers.
-    idx : positions of cls in theory vector.
-    data : data vector.
-    cov : covariance of the data.
-    inv_cov : inverse covariance of the data.
-end
-```
--files: npz file
-"""
-function make_data(sacc_file, yaml_file; nzs_path="")
     #cut
     s = _apply_scale_cuts(sacc_file, yaml_file)
         
@@ -77,7 +64,7 @@ function make_data(sacc_file, yaml_file; nzs_path="")
     pairs = []
     for cl in yaml_file["order"]
         t1, t2 = cl["tracers"]
-        cl_name = cl["cl_name"]
+        cl_name = _get_cl_name(s, t1, t2)
         l, c_ell, ind = s.get_ell_cl(cl_name, string(t1), string(t2),
                                      return_cov=false, return_ind=true)
         append!(indices, pyconvert(Vector{Int}, ind))
@@ -100,8 +87,8 @@ function make_data(sacc_file, yaml_file; nzs_path="")
     types = [_get_type(s, name) for name in names]
     
     # build struct
-    instructions = Instructions(names, pairs, types, idx,
-                                cls, cov, inv_cov)
+    meta = Meta(names, pairs, types, idx,
+                cls, cov, inv_cov)
     
     # Initialize
     files = Dict{String}{Vector}()
@@ -115,20 +102,21 @@ function make_data(sacc_file, yaml_file; nzs_path="")
     # Load in nz's
     for (name, tracer) in s.tracers.items()
         if string(name) in names
-            if nzs_path == ""
+            if string("nz_", name) in kwargs_keys
+                println(string("using custom nz for ", string("nz_", name)))
+                nzs = kwargs[Symbol("nz_", name)]
+                z= pyconvert(Vector{Float64}, nzs["z"])
+                nz=pyconvert(Vector{Float64}, nzs["dndz"])
+                merge!(files, Dict(string("nz_", name)=>[z, nz]))
+            else
                 if string(tracer.quantity) != "cmb_convergence"
                     z=pyconvert(Vector{Float64}, tracer.z)
                     nz=pyconvert(Vector{Float64}, tracer.nz)
                     merge!(files, Dict(string("nz_", name)=>[z, nz]))
                 end
-            else
-                nzs = npzread(string(nzs_path, "nz_", name, ".npz"))
-                z = nzs["z"]
-                dndz = nzs["dndz"]
-                merge!(files, Dict(string("nz_", name)=>[z, dndz]))
             end
         end
     end
     
-    return instructions, files
-end 
+    return meta, files
+end
