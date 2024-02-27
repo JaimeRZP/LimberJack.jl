@@ -1,4 +1,4 @@
-struct Meta
+struct Instructions
     names
     pairs
     types
@@ -87,8 +87,8 @@ function make_data(sacc_file, yaml_file; kwargs...)
     types = [_get_type(s, name) for name in names]
     
     # build struct
-    meta = Meta(names, pairs, types, idx,
-                cls, cov, inv_cov)
+    instructions = Instructions(names, pairs, types, idx,
+                        cls, cov, inv_cov)
     
     # Initialize
     files = Dict{String}{Vector}()
@@ -118,5 +118,5 @@ function make_data(sacc_file, yaml_file; kwargs...)
         end
     end
     
-    return meta, files
+    return instructions, files
 end
