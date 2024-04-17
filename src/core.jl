@@ -14,7 +14,7 @@ Kwargs:
 - `cosmo_type::Type=Float64` : type of cosmological parameters. 
 - `tk_mode::String=:EisHu` : choice of transfer function.
 - `Dz_mode::String=:RK2` : choice of method to compute the linear growth factor.
-- `Pk_mode::String=:linear` : choice of method to apply non-linear corrections to the matter power spectrum.
+- `pk_mode::String=:linear` : choice of method to apply non-linear corrections to the matter power spectrum.
 
 Returns:
 ```
@@ -38,7 +38,7 @@ mutable struct Settings
     cosmo_type::DataType
     tk_mode::Symbol
     Dz_mode::Symbol
-    Pk_mode::Symbol
+    pk_mode::Symbol
 end        
 ``` 
 """
@@ -63,7 +63,7 @@ mutable struct Settings
     cosmo_type::DataType
     tk_mode::Symbol
     Dz_mode::Symbol
-    Pk_mode::Symbol
+    pk_mode::Symbol
 end
 
 Settings(;kwargs...) = begin
@@ -87,11 +87,11 @@ Settings(;kwargs...) = begin
     cosmo_type = get(kwargs, :cosmo_type, Float64)
     tk_mode = get(kwargs, :tk_mode, :EisHu)
     Dz_mode = get(kwargs, :Dz_mode, :RK2)
-    Pk_mode = get(kwargs, :Pk_mode, :linear)
+    pk_mode = get(kwargs, :pk_mode, :linear)
     Settings(nz, nz_chi, nz_t, nk, nℓ,
              xs, zs, zs_chi, zs_t, ks, ℓs, logk,  dlogk,
              using_As,
-             cosmo_type, tk_mode, Dz_mode, Pk_mode)
+             cosmo_type, tk_mode, Dz_mode, pk_mode)
 end
 
 """
@@ -215,8 +215,8 @@ the primordial power spectrum is calculated using:
 
 Depending on the choice of power spectrum mode in the settings, \
 the matter power spectrum is either: 
-- `Pk_mode = :linear` : the linear matter power spectrum.
-- `Pk_mode = :halofit` : the Halofit non-linear matter power spectrum (arXiv:astro-ph/0207664).
+- `pk_mode = :linear` : the linear matter power spectrum.
+- `pk_mode = :halofit` : the Halofit non-linear matter power spectrum (arXiv:astro-ph/0207664).
 
 Arguments:
 - `Settings::MutableStructure` : cosmology constructure settings. 
@@ -267,17 +267,17 @@ Cosmology(cpar::CosmoPar, settings::Settings; kwargs...) = begin
     zi = linear_interpolation(chis, Vector(zs_chi), extrapolation_bc=Line())
     Dzs, Dzi, fs8zi = get_growth(cpar, settings; kwargs...)
 
-    if settings.Pk_mode == :linear
+    if settings.pk_mode == :linear
         Pks = pk0 * (Dzs.^2)'
         Pki = linear_interpolation((logk, zs), log.(Pks);
                                    extrapolation_bc=Line())
-    elseif settings.Pk_mode == :Halofit
+    elseif settings.pk_mode == :Halofit
         Pki = get_PKnonlin(cpar, zs, ks, pk0, Dzs;
                           cosmo_type=cosmo_type)
     else 
         @error("Pk mode not implemented")
     end
-    Cosmology(settings, cpar, chii, zi, ti, chii(3.0),
+    Cosmology(settings, cpar, chii, zi, ti, chi_LSS,
               chi_LSS, Dzi, fs8zi, pki, Pki)
 end
 
