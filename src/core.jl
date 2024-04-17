@@ -277,7 +277,7 @@ Cosmology(cpar::CosmoPar, settings::Settings; kwargs...) = begin
     else 
         @error("Pk mode not implemented")
     end
-    Cosmology(settings, cpar, chii, zi, ti, chis[end],
+    Cosmology(settings, cpar, chii, zi, ti, chii(3.0),
               chi_LSS, Dzi, fs8zi, pki, Pki)
 end
 
