@@ -617,7 +617,7 @@ if test_main
 
             function Cl_kk(p::T)::Array{T,1} where T<:Real
                 cosmo = LimberJack.Cosmology(Ωm=p, tk_mode=:EisHu, Pk_mode=:Halofit,
-                    nz=700, nz_t=700, nz_pk=700)
+                    z_max=1100.0, nz=700, nz_t=700, nz_pk=700)
                 z = range(0., stop=2., length=256)
                 nz = @. exp(-0.5*((z-0.5)/0.05)^2)
                 tk = CMBLensingTracer(cosmo)
