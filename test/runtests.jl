@@ -26,14 +26,15 @@ end
 test_output = Dict{String}{Vector}()
 
 if test_main
-    cosmo_EisHu = Cosmology(nz=1000, nz_t=1000, nz_pk=1000, nk=1000, tk_mode=:EisHu)
+    cosmo_EisHu = Cosmology(z_max=1100, nz=1000, nz_t=1000, nz_pk=1000, nk=1000, tk_mode=:EisHu)
     cosmo_emul = Cosmology(Ωm=(0.12+0.022)/0.75^2, Ωb=0.022/0.75^2, h=0.75, ns=1.0, σ8=0.81,
-        nz=1000, nz_t=1000, nz_pk=1000, nk=1000, tk_mode=:EmuPk)
+        z_max=1100, nz=1000, nz_t=1000, nz_pk=1000, nk=1000, tk_mode=:EmuPk)
     cosmo_emul_As = Cosmology(Ωm=0.27, Ωb=0.046, h=0.7, ns=1.0, As=2.097e-9,
-        nz=1000, nz_t=1000, nz_pk=1000, nk=1000, tk_mode=:EmuPk)
-    cosmo_EisHu_nonlin = Cosmology(nk=1000, nz=1000, nz_t=1000, nz_pk=1000, tk_mode=:EisHu, Pk_mode=:Halofit)
+        z_max=1100, nz=1000, nz_t=1000, nz_pk=1000, nk=1000, tk_mode=:EmuPk)
+    cosmo_EisHu_nonlin = Cosmology(nk=1000, nz=1000, nz_t=1000, nz_pk=1000,
+        z_max=1100, tk_mode=:EisHu, pk_mode=:Halofit)
     cosmo_emul_nonlin = Cosmology(Ωm=(0.12+0.022)/0.75^2, Ωb=0.022/0.75^2, h=0.75, ns=1.0, σ8=0.81,
-    nk=1000, nz=1000, nz_t=1000, nz_pk=1000, tk_mode=:EmuPk, Pk_mode=:Halofit)
+        z_max=1100, nk=1000, nz=1000, nz_t=1000, nz_pk=1000, tk_mode=:EmuPk, pk_mode=:Halofit)
 
     @testset "Main tests" begin
         @testset "CreateCosmo" begin
@@ -616,7 +617,7 @@ if test_main
 
             function Cl_kk(p::T)::Array{T,1} where T<:Real
                 cosmo = LimberJack.Cosmology(Ωm=p, tk_mode=:EisHu, Pk_mode=:Halofit,
-                    nz=700, nz_t=700, nz_pk=700)
+                    z_max=1100.0, nz=700, nz_t=700, nz_pk=700)
                 z = range(0., stop=2., length=256)
                 nz = @. exp(-0.5*((z-0.5)/0.05)^2)
                 tk = CMBLensingTracer(cosmo)
@@ -706,7 +707,7 @@ if test_main
                 cosmo.settings.cosmo_type = typeof(p)
                 z = Vector(range(0., stop=2., length=1000)) .- p
                 nz = Vector(@. exp(-0.5*((z-0.5)/0.05)^2))
-                tg = NumberCountsTracer(cosmo, z, nz; b=1)
+                tg = NumberCountsTracer(cosmo, z, nz; b=1, res=350)
                 ℓs = [10.0, 30.0, 100.0, 300.0]
                 Cℓ_gg = angularCℓs(cosmo, tg, tg, ℓs) 
                 return Cℓ_gg

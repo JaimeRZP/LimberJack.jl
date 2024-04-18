@@ -6,28 +6,23 @@ Constructor of settings structure constructor.
 Kwargs:
 
 - `nz::Int=300` : number of nodes in the general redshift array.
-- `nz_chi::Int=1000` : number of nodes in the redshift array used to compute matter power spectrum grid.
-- `nz_t::Int=350` : number of nodes in the general redshift array.
 - `nk::Int=500`: number of nodes in the k-scale array used to compute matter power spectrum grid.
 - `nℓ::Int=300`: number of nodes in the multipoles array.
 - `using_As::Bool=false`: `True` if using the `As` parameter.
 - `cosmo_type::Type=Float64` : type of cosmological parameters. 
 - `tk_mode::String=:EisHu` : choice of transfer function.
 - `Dz_mode::String=:RK2` : choice of method to compute the linear growth factor.
-- `Pk_mode::String=:linear` : choice of method to apply non-linear corrections to the matter power spectrum.
+- `pk_mode::String=:linear` : choice of method to apply non-linear corrections to the matter power spectrum.
 
 Returns:
 ```
 mutable struct Settings
     nz::Int
-    nz_chi::Int
-    nz_t::Int
     nk::Int
     nℓ::Int
 
     xs
     zs
-    zs_t
     ks
     ℓs
     logk
@@ -38,21 +33,17 @@ mutable struct Settings
     cosmo_type::DataType
     tk_mode::Symbol
     Dz_mode::Symbol
-    Pk_mode::Symbol
+    pk_mode::Symbol
 end        
 ``` 
 """
 mutable struct Settings
     nz::Int
-    nz_chi::Int
-    nz_t::Int
     nk::Int
     nℓ::Int
 
     xs
     zs
-    zs_chi
-    zs_t
     ks
     ℓs
     logk
@@ -63,20 +54,17 @@ mutable struct Settings
     cosmo_type::DataType
     tk_mode::Symbol
     Dz_mode::Symbol
-    Pk_mode::Symbol
+    pk_mode::Symbol
 end
 
 Settings(;kwargs...) = begin
     nz = get(kwargs, :nz, 300)
-    nz_chi = get(kwargs, :nz_chi, 1000)
-    nz_t = get(kwargs, :nz_t, 350)
     nk = get(kwargs, :nk, 500)
     nℓ = get(kwargs, :nℓ, 300)
 
-    xs = LinRange(0, log(1+1100), nz)
+    z_max = get(kwargs, :z_max, 3.0)
+    xs = LinRange(0, log(1+z_max), nz)
     zs = @.(exp(xs) - 1)
-    zs_chi = 10 .^ Vector(LinRange(-3, log10(1100), nz_chi))
-    zs_t = range(0.00001, stop=3.0, length=nz_t)
     logk = range(log(0.0001), stop=log(100.0), length=nk)
     ks = exp.(logk)
     dlogk = log(ks[2]/ks[1])
@@ -87,11 +75,11 @@ Settings(;kwargs...) = begin
     cosmo_type = get(kwargs, :cosmo_type, Float64)
     tk_mode = get(kwargs, :tk_mode, :EisHu)
     Dz_mode = get(kwargs, :Dz_mode, :RK2)
-    Pk_mode = get(kwargs, :Pk_mode, :linear)
-    Settings(nz, nz_chi, nz_t, nk, nℓ,
-             xs, zs, zs_chi, zs_t, ks, ℓs, logk,  dlogk,
+    pk_mode = get(kwargs, :pk_mode, :linear)
+    Settings(nz, nk, nℓ,
+             xs, zs, ks, ℓs, logk,  dlogk,
              using_As,
-             cosmo_type, tk_mode, Dz_mode, Pk_mode)
+             cosmo_type, tk_mode, Dz_mode, pk_mode)
 end
 
 """
@@ -215,8 +203,8 @@ the primordial power spectrum is calculated using:
 
 Depending on the choice of power spectrum mode in the settings, \
 the matter power spectrum is either: 
-- `Pk_mode = :linear` : the linear matter power spectrum.
-- `Pk_mode = :halofit` : the Halofit non-linear matter power spectrum (arXiv:astro-ph/0207664).
+- `pk_mode = :linear` : the linear matter power spectrum.
+- `pk_mode = :halofit` : the Halofit non-linear matter power spectrum (arXiv:astro-ph/0207664).
 
 Arguments:
 - `Settings::MutableStructure` : cosmology constructure settings. 
@@ -243,41 +231,41 @@ end
 Cosmology(cpar::CosmoPar, settings::Settings; kwargs...) = begin
     # Load settings
     cosmo_type = settings.cosmo_type
-    zs_chi, nz_chi = settings.zs_chi, settings.nz_chi
     zs, nz = settings.zs, settings.nz
     logk, nk = settings.logk, settings.nk
     ks = settings.ks
     dlogk = settings.dlogk
     pk0, pki = lin_Pk0(cpar, settings; kwargs...)
     # Compute redshift-distance relation
-    chis = zeros(cosmo_type, nz_chi)
-    ts = zeros(cosmo_type, nz_chi)
-    for i in 1:nz_chi
-        zz = zs_chi[i]
+    chis = zeros(cosmo_type, nz)
+    ts = zeros(cosmo_type, nz)
+    for i in 1:nz
+        zz = zs[i]
         chis[i] = quadgk(z -> 1.0/Ez(cpar, z), 0.0, zz, rtol=1E-5)[1]
         chis[i] *= CLIGHT_HMPC / cpar.h
         ts[i] = quadgk(z -> 1.0/((1+z)*Ez(cpar, z)), 0.0, zz, rtol=1E-5)[1]
         ts[i] *= cpar.h*(18.356164383561644*10^9)
     end
     # Distance to LSS
-    chi_LSS = chis[end]
+    chi_LSS = quadgk(z -> 1.0/Ez(cpar, z), 0.0, 1100., rtol=1E-5)[1]
+    chi_LSS *= CLIGHT_HMPC / cpar.h
     # OPT: tolerances, interpolation method
-    chii = linear_interpolation(zs_chi, Vector(chis), extrapolation_bc=Line())
-    ti = linear_interpolation(zs_chi, Vector(ts), extrapolation_bc=Line())
-    zi = linear_interpolation(chis, Vector(zs_chi), extrapolation_bc=Line())
+    chii = linear_interpolation(zs, Vector(chis), extrapolation_bc=Line())
+    ti = linear_interpolation(zs, Vector(ts), extrapolation_bc=Line())
+    zi = linear_interpolation(chis, Vector(zs), extrapolation_bc=Line())
     Dzs, Dzi, fs8zi = get_growth(cpar, settings; kwargs...)
 
-    if settings.Pk_mode == :linear
+    if settings.pk_mode == :linear
         Pks = pk0 * (Dzs.^2)'
         Pki = linear_interpolation((logk, zs), log.(Pks);
                                    extrapolation_bc=Line())
-    elseif settings.Pk_mode == :Halofit
+    elseif settings.pk_mode == :Halofit
         Pki = get_PKnonlin(cpar, zs, ks, pk0, Dzs;
                           cosmo_type=cosmo_type)
     else 
         @error("Pk mode not implemented")
     end
-    Cosmology(settings, cpar, chii, zi, ti, chis[end],
+    Cosmology(settings, cpar, chii, zi, ti, chi_LSS,
               chi_LSS, Dzi, fs8zi, pki, Pki)
 end
 
