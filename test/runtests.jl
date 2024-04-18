@@ -26,14 +26,15 @@ end
 test_output = Dict{String}{Vector}()
 
 if test_main
-    cosmo_EisHu = Cosmology(nz=1000, nz_t=1000, nz_pk=1000, nk=1000, tk_mode=:EisHu)
+    cosmo_EisHu = Cosmology(z_max=1100, nz=1000, nz_t=1000, nz_pk=1000, nk=1000, tk_mode=:EisHu)
     cosmo_emul = Cosmology(Ωm=(0.12+0.022)/0.75^2, Ωb=0.022/0.75^2, h=0.75, ns=1.0, σ8=0.81,
-        nz=1000, nz_t=1000, nz_pk=1000, nk=1000, tk_mode=:EmuPk)
+        z_max=1100, nz=1000, nz_t=1000, nz_pk=1000, nk=1000, tk_mode=:EmuPk)
     cosmo_emul_As = Cosmology(Ωm=0.27, Ωb=0.046, h=0.7, ns=1.0, As=2.097e-9,
-        nz=1000, nz_t=1000, nz_pk=1000, nk=1000, tk_mode=:EmuPk)
-    cosmo_EisHu_nonlin = Cosmology(nk=1000, nz=1000, nz_t=1000, nz_pk=1000, tk_mode=:EisHu, pk_mode=:Halofit)
+        z_max=1100, nz=1000, nz_t=1000, nz_pk=1000, nk=1000, tk_mode=:EmuPk)
+    cosmo_EisHu_nonlin = Cosmology(nk=1000, nz=1000, nz_t=1000, nz_pk=1000,
+        z_max=1100, tk_mode=:EisHu, pk_mode=:Halofit)
     cosmo_emul_nonlin = Cosmology(Ωm=(0.12+0.022)/0.75^2, Ωb=0.022/0.75^2, h=0.75, ns=1.0, σ8=0.81,
-    nk=1000, nz=1000, nz_t=1000, nz_pk=1000, tk_mode=:EmuPk, pk_mode=:Halofit)
+        z_max=1100, nk=1000, nz=1000, nz_t=1000, nz_pk=1000, tk_mode=:EmuPk, pk_mode=:Halofit)
 
     @testset "Main tests" begin
         @testset "CreateCosmo" begin

@@ -73,7 +73,7 @@ Settings(;kwargs...) = begin
     nk = get(kwargs, :nk, 500)
     nℓ = get(kwargs, :nℓ, 300)
 
-    z_max = get(kwargs, :z_max, 1100)
+    z_max = get(kwargs, :z_max, 3)
     xs = LinRange(0, log(1+z_max), nz)
     zs = @.(exp(xs) - 1)
     zs_chi = 10 .^ Vector(LinRange(-3, log10(1100), nz_chi))
