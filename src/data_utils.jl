@@ -36,15 +36,15 @@ function _get_cl_name(s, t1, t2)
 end
 
 function _get_cl_name(t1, t2)
-    name_dict = Dict("lens"=>"e", "source"=>"0")
+    name_dict = Dict(
+        ["lens", "lens"]=>"galaxy_density_cl",
+        ["lens", "source"]=>"galaxy_shearDensity_cl_e",
+        ["source", "lens"]=>"galaxy_shearDensity_cl_e",
+        ["source", "source"]=>"galaxy_shear_cl_ee")
     name_1 = pyconvert(String, t1)[1:end-2]
     name_2 = pyconvert(String, t2)[1:end-2]
-    spin1 = name_dict[name_1]
-    spin2 = name_dict[name_2]
-    cl_name = string("cl_", spin1 , spin2)
-    if cl_name == "cl_e0"
-        cl_name = "cl_0e"
-    end
+    name = [name_1, name_2]
+    cl_name = name_dict[name]
     return cl_name 
 end
 
