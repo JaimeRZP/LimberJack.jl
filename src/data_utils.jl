@@ -37,8 +37,8 @@ end
 
 function _get_cl_name(t1, t2)
     name_dict = Dict("lens"=>"e", "source"=>"0")
-    name_1 = t1[1:end-2]
-    name_2 = t2[1:end-2]
+    name_1 = pyconvert(String, t1)[1:end-2]
+    name_2 = pyconvert(String, t2)[1:end-2]
     spin1 = name_dict[name_1]
     spin2 = name_dict[name_2]
     cl_name = string("cl_", spin1 , spin2)
