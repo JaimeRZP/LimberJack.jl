@@ -35,6 +35,19 @@ function _get_cl_name(s, t1, t2)
     return cl_name 
 end
 
+function _get_cl_name(t1, t2)
+    name_dict = Dict("lens"=>"e", "source"=>"0")
+    name_1 = t1[1:end-2]
+    name_2 = t2[1:end-2]
+    spin1 = name_dict[name_1]
+    spin2 = name_dict[name_2]
+    cl_name = string("cl_", spin1 , spin2)
+    if cl_name == "cl_e0"
+        cl_name = "cl_0e"
+    end
+    return cl_name 
+end
+
 function _apply_scale_cuts(s, yaml_file)
     indices = Vector{Int}([])
     for cl in yaml_file["order"]
@@ -160,7 +173,7 @@ function make_data(s; kwargs...)
     pairs = []
     for cl in s.get_tracer_combinations()
         t1, t2 = cl
-        cl_name = _get_cl_name(s, t1, t2)
+        cl_name = _get_cl_name(t1, t2)
         l, c_ell, ind = s.get_ell_cl(cl_name, string(t1), string(t2),
                                      return_cov=false, return_ind=true)
         append!(indices, pyconvert(Vector{Int}, ind))
