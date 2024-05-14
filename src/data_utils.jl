@@ -26,7 +26,7 @@ function _get_cl_name(t1, t2)
     return cl_name 
 end
 
-function _apply_scale_cuts(s, yaml_file)
+function _apply_scale_cuts!(s, yaml_file)
     indices = Vector{Int}([])
     for cl in yaml_file["order"]
         t1, t2 = cl["tracers"]
@@ -40,8 +40,9 @@ function _apply_scale_cuts(s, yaml_file)
             end
         end
     end
-    s.keep_indices(indices)
-    return s
+    if length(indices) != 0
+        s.keep_indices(indices)
+    end
 end
 
 
@@ -77,7 +78,7 @@ function make_data(sacc_file, yaml_file; kwargs...)
     kwargs_keys = [string(i) for i in collect(keys(kwargs))]
 
     #cut
-    s = _apply_scale_cuts(sacc_file, yaml_file)
+    _apply_scale_cuts!(sacc_file, yaml_file)
         
     #build quantities of interest
     data = Vector{Float64}([])
