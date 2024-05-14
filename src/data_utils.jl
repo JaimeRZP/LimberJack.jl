@@ -89,8 +89,12 @@ function make_data(sacc_file, yaml_file; kwargs...)
         t1, t2 = cl["tracers"]
         cls = cl["cls"]
         for cl_name in cls
-            l, c_ell, ind = s.get_ell_cl(cl_name, string(t1), string(t2),
-                                        return_cov=false, return_ind=true)
+            l, c_ell, ind = sacc_file.get_ell_cl(
+                cl_name,
+                string(t1),
+                string(t2),
+                return_cov=false,
+                sreturn_ind=true)
             append!(indices, pyconvert(Vector{Int}, ind))
             append!(data, pyconvert(Vector{Float64}, c_ell))
             push!(ls, pyconvert(Vector{Float64}, l))
@@ -109,7 +113,7 @@ function make_data(sacc_file, yaml_file; kwargs...)
     lengths = [length(l) for l in ls]
     lengths = vcat([0], lengths)
     idx  = cumsum(lengths)
-    types = [_get_type(s, name) for name in names]
+    types = [_get_type(sacc_file, name) for name in names]
     
     # build struct
     instructions = Instructions(names, pairs, types, idx,
