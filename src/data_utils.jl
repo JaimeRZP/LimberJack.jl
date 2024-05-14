@@ -78,7 +78,7 @@ function make_data(sacc_file, yaml_file; kwargs...)
     s = _apply_scale_cuts(sacc_file, yaml_file)
         
     #build quantities of interest
-    cls = Vector{Float64}([])
+    data = Vector{Float64}([])
     ls = []
     indices = Vector{Int}([])
     pairs = []
@@ -89,7 +89,7 @@ function make_data(sacc_file, yaml_file; kwargs...)
             l, c_ell, ind = s.get_ell_cl(cl_name, string(t1), string(t2),
                                         return_cov=false, return_ind=true)
             append!(indices, pyconvert(Vector{Int}, ind))
-            append!(cls, pyconvert(Vector{Float64}, c_ell))
+            append!(data, pyconvert(Vector{Float64}, c_ell))
             push!(ls, pyconvert(Vector{Float64}, l))
             push!(pairs, pyconvert(Vector{String}, [t1, t2]))
         end
@@ -110,7 +110,7 @@ function make_data(sacc_file, yaml_file; kwargs...)
     
     # build struct
     instructions = Instructions(names, pairs, types, idx,
-                                cls, cov, inv_cov)
+                                data, cov, inv_cov)
     
     # Initialize
     files = Dict{String}{Vector}()
