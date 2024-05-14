@@ -94,7 +94,7 @@ function make_data(sacc_file, yaml_file; kwargs...)
                 string(t1),
                 string(t2),
                 return_cov=false,
-                sreturn_ind=true)
+                return_ind=true)
             append!(indices, pyconvert(Vector{Int}, ind))
             append!(data, pyconvert(Vector{Float64}, c_ell))
             push!(ls, pyconvert(Vector{Float64}, l))
