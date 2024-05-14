@@ -129,7 +129,7 @@ function make_data(sacc_file, yaml_file; kwargs...)
     end
     
     # Load in nz's
-    for (name, tracer) in s.tracers.items()
+    for (name, tracer) in sacc_file.tracers.items()
         if string(name) in names
             if string("nz_", name) in kwargs_keys
                 println(string("using custom nz for ", string("nz_", name)))
