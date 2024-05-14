@@ -31,11 +31,13 @@ function _apply_scale_cuts(s, yaml_file)
     for cl in yaml_file["order"]
         t1, t2 = cl["tracers"]
         cls = cl["cls"]
-        lmin, lmax = cl["ell_cuts"]
-        for cl_name in cls
-            ind = s.indices(cl_name, (t1, t2),
-                            ell__gt=lmin, ell__lt=lmax)
-            append!(indices, pyconvert(Vector{Int}, ind))
+        if "ell_cuts" in keys(cl)
+            lmin, lmax = cl["ell_cuts"]
+            for cl_name in cls
+                ind = s.indices(cl_name, (t1, t2),
+                                ell__gt=lmin, ell__lt=lmax)
+                append!(indices, pyconvert(Vector{Int}, ind))
+            end
         end
     end
     s.keep_indices(indices)
