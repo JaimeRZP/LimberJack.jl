@@ -13,28 +13,6 @@ function _get_type(sacc_file, tracer_name)
     return pyconvert(String, typ)
 end
 
-function _get_spin(sacc_file, tracer_name)
-    tt = string(sacc_file.tracers[tracer_name].quantity)
-    if tt == "galaxy_shear"
-        spin = "e"
-    elseif tt == "galaxy_density"
-        spin = "0"
-    elseif tt == "cmb_convergence"
-        spin = "0"
-    end
-    return spin
-end 
-
-function _get_cl_name(s, t1, t2)
-    spin1 = _get_spin(s, t1)
-    spin2 = _get_spin(s, t2)
-    cl_name = string("cl_", spin1 , spin2)
-    if cl_name == "cl_e0"
-        cl_name = "cl_0e"
-    end
-    return cl_name 
-end
-
 function _get_cl_name(t1, t2)
     name_dict = Dict(
         ["lens", "lens"]=>"galaxy_density_cl",
@@ -52,11 +30,13 @@ function _apply_scale_cuts(s, yaml_file)
     indices = Vector{Int}([])
     for cl in yaml_file["order"]
         t1, t2 = cl["tracers"]
+        cls = cl["cls"]
         lmin, lmax = cl["ell_cuts"]
-        cl_name = _get_cl_name(s, t1, t2)
-        ind = s.indices(cl_name, (t1, t2),
-                        ell__gt=lmin, ell__lt=lmax)
-        append!(indices, pyconvert(Vector{Int}, ind))
+        for cl_name in cls
+            ind = s.indices(cl_name, (t1, t2),
+                            ell__gt=lmin, ell__lt=lmax)
+            append!(indices, pyconvert(Vector{Int}, ind))
+        end
     end
     s.keep_indices(indices)
     return s
@@ -104,13 +84,15 @@ function make_data(sacc_file, yaml_file; kwargs...)
     pairs = []
     for cl in yaml_file["order"]
         t1, t2 = cl["tracers"]
-        cl_name = _get_cl_name(s, t1, t2)
-        l, c_ell, ind = s.get_ell_cl(cl_name, string(t1), string(t2),
-                                     return_cov=false, return_ind=true)
-        append!(indices, pyconvert(Vector{Int}, ind))
-        append!(cls, pyconvert(Vector{Float64}, c_ell))
-        push!(ls, pyconvert(Vector{Float64}, l))
-        push!(pairs, pyconvert(Vector{String}, [t1, t2]))
+        cls = cl["cls"]
+        for cl_name in cls
+            l, c_ell, ind = s.get_ell_cl(cl_name, string(t1), string(t2),
+                                        return_cov=false, return_ind=true)
+            append!(indices, pyconvert(Vector{Int}, ind))
+            append!(cls, pyconvert(Vector{Float64}, c_ell))
+            push!(ls, pyconvert(Vector{Float64}, l))
+            push!(pairs, pyconvert(Vector{String}, [t1, t2]))
+        end
     end
     
     names = unique(vcat(pairs...))
