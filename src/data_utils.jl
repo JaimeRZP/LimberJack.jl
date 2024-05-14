@@ -103,7 +103,7 @@ function make_data(sacc_file, yaml_file; kwargs...)
     end
     
     names = unique(vcat(pairs...))
-    cov = pyconvert(Vector{Vector{Float64}}, s.covariance.dense)
+    cov = pyconvert(Vector{Vector{Float64}}, sacc_file.covariance.dense)
     cov = permutedims(hcat(cov...))[indices.+1, :][:, indices.+1]
     w, v = eigen(cov)
     cov = v * (diagm(abs.(w)) * v')
