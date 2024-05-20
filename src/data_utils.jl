@@ -1,4 +1,4 @@
-struct Instructions
+mutable struct Instructions
     names
     pairs
     types
