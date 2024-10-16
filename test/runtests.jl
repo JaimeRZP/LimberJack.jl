@@ -707,7 +707,7 @@ if test_main
                 cosmo.settings.cosmo_type = typeof(p)
                 z = Vector(range(0., stop=2., length=1000)) .- p
                 nz = Vector(@. exp(-0.5*((z-0.5)/0.05)^2))
-                tg = NumberCountsTracer(cosmo, z, nz; b=1, res=350)
+                tg = NumberCountsTracer(cosmo, z, nz; b=1)
                 ℓs = [10.0, 30.0, 100.0, 300.0]
                 Cℓ_gg = angularCℓs(cosmo, tg, tg, ℓs) 
                 return Cℓ_gg
