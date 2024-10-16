@@ -27,10 +27,8 @@ Kwargs:
 Returns:
 - `NumberCountsTracer::NumberCountsTracer` : Number counts tracer structure.
 """
-NumberCountsTracer(cosmo::Cosmology, z_n, nz; b=1.0, res=1000) = begin
-    nz_int = linear_interpolation(z_n, nz, extrapolation_bc=0)
-    z_w = range(0.00001, stop=z_n[end], length=res)
-    nz_w = nz_int(z_w)
+NumberCountsTracer(cosmo::Cosmology, z_n, nz; b=1.0) = begin
+    z_w, nz_w = nz_interpolate(z_n, nz)
     nz_norm = integrate(z_w, nz_w, SimpsonEven())
     
     chi = cosmo.chi(z_w)
@@ -62,15 +60,10 @@ struct WeakLensingTracer <: Tracer
 end
 
 WeakLensingTracer(cosmo::Cosmology, z_n, nz;
-    IA_params = [0.0, 0.0], m=0.0, res=350, kwargs...) = begin
-    nz_int = linear_interpolation(z_n, nz, extrapolation_bc=0) 
+    IA_params = [0.0, 0.0], m=0.0, kwargs...) = begin
     cosmo_type = cosmo.settings.cosmo_type
-    z_w = range(0.00001, stop=z_n[end], length=res)
-    dz_w = (z_w[end]-z_w[1])/res
-    nz_w = nz_int(z_w)
+    z_w, nz_w = nz_interpolate(z_n, nz)
     chi = cosmo.chi(z_w)
-    
-    #nz_norm = sum(0.5 .* (nz_w[1:res-1] .+ nz_w[2:res]) .* dz_w)
     nz_norm = integrate(z_w, nz_w, SimpsonEven())
 
     # Calculate chis at which to precalculate the lensing kernel
@@ -156,4 +149,14 @@ function get_IA(cosmo::Cosmology, zs, IA_params)
     A_IA = IA_params[1]
     alpha_IA = IA_params[2]
     return @. A_IA*((1 + zs)/1.62)^alpha_IA * (0.0134 * cosmo.cpar.Ωm / cosmo.Dz(zs))
+end
+
+function nz_interpolate(z, nz)
+    dz = mean(z[2:end] - z[1:end-1])
+    z_range = z[1]:dz:z[end]
+    nz_int = cubic_spline_interpolation(z_range, nz)
+    dzz = dz/10
+    zz_range = z[1]:dzz:z[end]
+    nzz = nz_int(zz_range)
+    return zz_range, nzz
 end
