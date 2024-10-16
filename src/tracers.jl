@@ -63,6 +63,7 @@ WeakLensingTracer(cosmo::Cosmology, z_n, nz;
     IA_params = [0.0, 0.0], m=0.0, kwargs...) = begin
     cosmo_type = cosmo.settings.cosmo_type
     z_w, nz_w = nz_interpolate(z_n, nz)
+    res = length(z_w)
     chi = cosmo.chi(z_w)
     nz_norm = integrate(z_w, nz_w, SimpsonEven())
 
