@@ -28,7 +28,6 @@ Returns:
 - `NumberCountsTracer::NumberCountsTracer` : Number counts tracer structure.
 """
 NumberCountsTracer(cosmo::Cosmology, z_n, nz; b=1.0, res=1000) = begin
-
     z_w, nz_w = nz_interpolate(z_n, nz, res)
     nz_norm = integrate(z_w, nz_w, SimpsonEven())
     
@@ -62,13 +61,11 @@ end
 
 WeakLensingTracer(cosmo::Cosmology, z_n, nz;
     IA_params = [0.0, 0.0], m=0.0, res=350, kwargs...) = begin
-
     cosmo_type = cosmo.settings.cosmo_type
     z_w, nz_w = nz_interpolate(z_n, nz, res)
-    chi = cosmo.chi(z_w)
-    
-    #nz_norm = sum(0.5 .* (nz_w[1:res-1] .+ nz_w[2:res]) .* dz_w)
+    res = length(z_w)
     nz_norm = integrate(z_w, nz_w, SimpsonEven())
+    chi = cosmo.chi(z_w)
 
     # Calculate chis at which to precalculate the lensing kernel
     # OPT: perhaps we don't need to sample the lensing kernel
@@ -164,6 +161,7 @@ function nz_interpolate(z, nz, res=nothing)
     else
         L = z[end] - z[1]
         dzz = L/res
+        println("dzz: ", dzz)
     end
     zz_range = z[1]:dzz:z[end]
     nzz = nz_int(zz_range)
