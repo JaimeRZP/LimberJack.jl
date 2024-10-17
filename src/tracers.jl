@@ -158,6 +158,7 @@ function nz_interpolate(z, nz; mode="linear", res=nothing)
     if mode!="none"
         if mode=="linear"
             nz_int = linear_interpolation(z, nz, extrapolation_bc=Line())
+        end
         if mode=="cubic"
             dz = mean(z[2:end] - z[1:end-1])
             z_range = z[1]:dz:z[end]
