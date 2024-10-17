@@ -62,7 +62,7 @@ end
 
 WeakLensingTracer(cosmo::Cosmology, z_n, nz;
     IA_params = [0.0, 0.0], m=0.0,
-    res=350, nz_interpolate="linear") = begin
+    res=350, nz_interpolation="linear") = begin
     cosmo_type = cosmo.settings.cosmo_type
     z_w, nz_w = nz_interpolate(z_n, nz, res)
     res = length(z_w)
