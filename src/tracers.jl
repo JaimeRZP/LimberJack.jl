@@ -166,7 +166,7 @@ function nz_interpolate(z, nz, res; mode="linear")
             dz = mean(z[2:end] - z[1:end-1])
             z_range = z[1]:dz:z[end]
             nz_int = cubic_spline_interpolation(z_range, nz;
-                extrpolation_bc=Line())
+                extrapolation_bc=Line())
         end
         zz_range = range(0.00001, stop=z[end], length=res)
         nzz = nz_int(zz_range)
