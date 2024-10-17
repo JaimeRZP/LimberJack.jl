@@ -161,7 +161,6 @@ function nz_interpolate(z, nz, res=nothing)
     else
         L = z[end] - z[1]
         dzz = L/res
-        println("dzz: ", dzz)
     end
     zz_range = z[1]:dzz:z[end]
     nzz = nz_int(zz_range)
