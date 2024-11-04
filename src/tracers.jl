@@ -28,7 +28,7 @@ Returns:
 - `NumberCountsTracer::NumberCountsTracer` : Number counts tracer structure.
 """
 NumberCountsTracer(cosmo::Cosmology, z_n, nz; 
-    b=1.0, res=1000, nz_interpolation="linear") = begin
+    b=1.0, res=1000, nz_interpolation="linear", smooth=false) = begin
     z_w, nz_w = nz_interpolate(z_n, nz, res;
         mode=nz_interpolation)
     nz_norm = integrate(z_w, nz_w, SimpsonEven())
@@ -37,8 +37,10 @@ NumberCountsTracer(cosmo::Cosmology, z_n, nz;
     hz = Hmpc(cosmo, z_w)
     
     w_arr = @. (nz_w*hz/nz_norm)
-    w_smooth = smooth_w_neighbors(w_arr)
-    wint = linear_interpolation(chi, b .* w_smooth, extrapolation_bc=Line())
+    if smooth
+        w_arr = smooth_w_neighbors(w_arr)
+    end
+    wint = linear_interpolation(chi, b .* w_arr, extrapolation_bc=Line())
     F::Function = ℓ -> 1
     NumberCountsTracer(wint, F)
 end

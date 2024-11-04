@@ -25,7 +25,8 @@ function Theory(cosmology::Cosmology,
             dz = get(Nuisances, string(name, "_", "dz"), 0.0)
             tracer = NumberCountsTracer(cosmology, zs .+ dz, nz;
                                         b=b, res=res_gc, 
-                                        nz_interpolation=int_gc)
+                                        nz_interpolation=int_gc,
+                                        smooth=true)
         elseif t_type == "galaxy_shear"
             zs_mean, nz_mean = files[string("nz_", name)]
             m = get(Nuisances, string(name, "_", "m"), 0.0)
