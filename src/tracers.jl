@@ -179,7 +179,7 @@ function nz_interpolate(z, nz, res; mode="linear")
     end
 end
 
-function smooth_w_neighbors(arr, k::Int = 5)
+function smooth_w_neighbors(arr; k::Int = 5)
     N = length(arr)
     neighbors = Vector{}(undef, N)  # Create an array to hold neighbor arrays
 
