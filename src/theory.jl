@@ -3,7 +3,8 @@ function Theory(cosmology::Cosmology,
                 idx, files;
                 Nuisances=Dict(),
                 res_wl=350, res_gc=1000,
-                int_wl="linear", int_gc="linear")
+                int_wl="linear", int_gc="linear",
+                smooth_gc=0)
     
     nui_type =  eltype(valtype(Nuisances))
     if !(nui_type <: Float64) & (nui_type != Any)
@@ -26,7 +27,7 @@ function Theory(cosmology::Cosmology,
             tracer = NumberCountsTracer(cosmology, zs .+ dz, nz;
                                         b=b, res=res_gc, 
                                         nz_interpolation=int_gc,
-                                        smooth=true)
+                                        smooth=smooth_gc)
         elseif t_type == "galaxy_shear"
             zs_mean, nz_mean = files[string("nz_", name)]
             m = get(Nuisances, string(name, "_", "m"), 0.0)
