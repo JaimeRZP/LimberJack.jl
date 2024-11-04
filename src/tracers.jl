@@ -28,7 +28,7 @@ Returns:
 - `NumberCountsTracer::NumberCountsTracer` : Number counts tracer structure.
 """
 NumberCountsTracer(cosmo::Cosmology, z_n, nz; 
-    b=1.0, res=1000, nz_interpolation="linear") = begin
+    b=1.0, res=1000, nz_interpolation="linear", smooth=false) = begin
     z_w, nz_w = nz_interpolate(z_n, nz, res;
         mode=nz_interpolation)
     nz_norm = integrate(z_w, nz_w, SimpsonEven())
@@ -37,6 +37,9 @@ NumberCountsTracer(cosmo::Cosmology, z_n, nz;
     hz = Hmpc(cosmo, z_w)
     
     w_arr = @. (nz_w*hz/nz_norm)
+    if smooth
+        w_arr = smooth_w_neighbors(w_arr)
+    end
     wint = linear_interpolation(chi, b .* w_arr, extrapolation_bc=Line())
     F::Function = ℓ -> 1
     NumberCountsTracer(wint, F)
@@ -174,4 +177,22 @@ function nz_interpolate(z, nz, res; mode="linear")
     else
         return z, nz
     end
+end
+
+function smooth_w_neighbors(arr::Vector{T}, k::Int = 5) where T
+    N = length(arr)
+    neighbors = Vector{}(undef, N)  # Create an array to hold neighbor arrays
+
+    half_k = div(k, 2)  # This is 2 if k=5, so we look at two neighbors on each side
+
+    for i in 1:N
+        # Define the range around the current element, clamping to avoid out-of-bounds
+        start_idx = max(1, i - half_k)
+        end_idx = min(N, i + half_k)
+        
+        # Collect neighbors and assign to the current position
+        neighbors[i] = mean(arr[start_idx:end_idx])
+    end
+
+    return neighbors
 end

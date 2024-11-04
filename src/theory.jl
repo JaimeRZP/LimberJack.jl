@@ -25,7 +25,8 @@ function Theory(cosmology::Cosmology,
             dz = get(Nuisances, string(name, "_", "dz"), 0.0)
             tracer = NumberCountsTracer(cosmology, zs .+ dz, nz;
                                         b=b, res=res_gc, 
-                                        nz_interpolation=int_gc)
+                                        nz_interpolation=int_gc,
+                                        smooth=true)
         elseif t_type == "galaxy_shear"
             zs_mean, nz_mean = files[string("nz_", name)]
             m = get(Nuisances, string(name, "_", "m"), 0.0)
@@ -57,7 +58,9 @@ function Theory(cosmology::Cosmology,
         ls = files[string("ls_", name1, "_", name2)]
         tracer1 = tracers[name1]
         tracer2 = tracers[name2]
-        cls[idx[i]+1:idx[i+1]] = angularCℓs(cosmology, tracer1, tracer2, ls)
+        lss = [[i for i in l-3:l+3] for l in ls]
+        clss = [mean(angularCℓs(cosmology, tracer1, tracer2, _lls)) for _lls in lss]
+        cls[idx[i]+1:idx[i+1]] = clss
     end
     
     return cls
