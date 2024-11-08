@@ -3,8 +3,7 @@ function Theory(cosmology::Cosmology,
                 idx, files;
                 Nuisances=Dict(),
                 res_wl=350, res_gc=1000,
-                int_wl="linear", int_gc="linear",
-                smooth_gc=0)
+                int_wl="linear", int_gc="linear")
     
     nui_type =  eltype(valtype(Nuisances))
     if !(nui_type <: Float64) & (nui_type != Any)
@@ -26,8 +25,7 @@ function Theory(cosmology::Cosmology,
             dz = get(Nuisances, string(name, "_", "dz"), 0.0)
             tracer = NumberCountsTracer(cosmology, zs .+ dz, nz;
                                         b=b, res=res_gc, 
-                                        nz_interpolation=int_gc,
-                                        smooth=smooth_gc)
+                                        nz_interpolation=int_gc)
         elseif t_type == "galaxy_shear"
             zs_mean, nz_mean = files[string("nz_", name)]
             m = get(Nuisances, string(name, "_", "m"), 0.0)
@@ -59,7 +57,7 @@ function Theory(cosmology::Cosmology,
         ls = files[string("ls_", name1, "_", name2)]
         tracer1 = tracers[name1]
         tracer2 = tracers[name2]
-        lss = [[i for i in l-3:l+3] for l in ls]
+        lss = [[i for i in l-4*log10(l):l+4*log10(l)] for l in ls]
         clss = [mean(angularCℓs(cosmology, tracer1, tracer2, _lls)) for _lls in lss]
         cls[idx[i]+1:idx[i+1]] = clss
     end

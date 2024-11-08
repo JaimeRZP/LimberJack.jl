@@ -167,7 +167,7 @@ if test_main
             merge!(test_output, Dict("lensing_warr"=> lensing_warr))
             merge!(test_output, Dict("CMBLensing_warr"=> CMBLensing_warr))
 
-            @test all(@. (abs(clustering_warr/clustering_warr_bm-1.0) < 0.05))
+            @test all(@. (abs(clustering_warr/clustering_warr_bm-1.0)[2:-1] < 0.01))
             @test all(@. (abs(lensing_warr/lensing_warr_bm-1.0)[1:-10] < 0.1))
             @test all(@. (abs(CMBLensing_warr/CMBLensing_warr_bm-1.0)[2:end-1] < 0.01))
         end
@@ -837,4 +837,3 @@ if test_Bolt
     end
 end    
 =#
-
