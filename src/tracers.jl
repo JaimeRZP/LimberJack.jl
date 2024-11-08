@@ -40,7 +40,7 @@ NumberCountsTracer(cosmo::Cosmology, z_n, nz;
     if smooth != 0
         w_arr = smooth_w_neighbors(w_arr, k=smooth)
     end
-    wint = linear_interpolation(chi, b .* w_arr, extrapolation_bc=Line())
+    wint = linear_interpolation(chi, b .* w_arr, extrapolation_bc=0.0)
     F::Function = ℓ -> 1
     NumberCountsTracer(wint, F)
 end
@@ -100,7 +100,7 @@ WeakLensingTracer(cosmo::Cosmology, z_n, nz;
 
     # Interpolate
     b = m+1.0
-    wint = linear_interpolation(chi, b.*w_arr, extrapolation_bc=Line())
+    wint = linear_interpolation(chi, b.*w_arr, extrapolation_bc=0.0)
     F::Function = ℓ -> @.(sqrt((ℓ+2)*(ℓ+1)*ℓ*(ℓ-1))/(ℓ+0.5)^2)
     WeakLensingTracer(wint, F)
 end

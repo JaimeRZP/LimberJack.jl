@@ -59,7 +59,7 @@ function Theory(cosmology::Cosmology,
         ls = files[string("ls_", name1, "_", name2)]
         tracer1 = tracers[name1]
         tracer2 = tracers[name2]
-        lss = [[i for i in l-3:l+3] for l in ls]
+        lss = [[i for i in l-4*log10(l):l+4*log10(l)] for l in ls]
         clss = [mean(angularCℓs(cosmology, tracer1, tracer2, _lls)) for _lls in lss]
         cls[idx[i]+1:idx[i+1]] = clss
     end
