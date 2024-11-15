@@ -90,7 +90,7 @@ WeakLensingTracer(cosmo::Cosmology, z_n, nz;
     
     if IA_params != [0.0, 0.0]
         hz = Hmpc(cosmo, z_w)
-        As = get_IA(cosmo, z_w,IA_params)
+        As = get_IA(cosmo, z_w, IA_params)
         corr =  @. As * (nz_w * hz / nz_norm)
         w_arr = @. w_arr - corr
     end
@@ -160,13 +160,13 @@ function nz_interpolate(z, nz, res; mode="linear")
     if mode!="none"
         if mode=="linear"
             nz_int = linear_interpolation(z, nz;
-                extrapolation_bc=Line())
+                extrapolation_bc=0.0)
         end
         if mode=="cubic"
             dz = mean(z[2:end] - z[1:end-1])
             z_range = z[1]:dz:z[end]
             nz_int = cubic_spline_interpolation(z_range, nz;
-                extrapolation_bc=Line())
+                extrapolation_bc=0.0)
         end
         zz_range = range(0.00001, stop=z[end], length=res)
         nzz = nz_int(zz_range)
