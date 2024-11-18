@@ -139,3 +139,22 @@ function get_IA(cosmo::Cosmology, zs, IA_params)
     return @. A_IA*((1 + zs)/1.62)^alpha_IA * (0.0134 * cosmo.cpar.Ωm / cosmo.Dz(zs))
 end
 
+function nz_interpolate(z, nz, res; mode="linear")
+    if mode!="none"
+        if mode=="linear"
+            nz_int = linear_interpolation(z, nz;
+                extrapolation_bc=Line())
+        end
+        if mode=="cubic"
+            dz = mean(z[2:end] - z[1:end-1])
+            z_range = z[1]:dz:z[end]
+            nz_int = cubic_spline_interpolation(z_range, nz;
+                extrapolation_bc=Line())
+        end
+        zz_range = range(0.00001, stop=z[end], length=res)
+        nzz = nz_int(zz_range)
+        return zz_range, nzz
+    else
+        return z, nz
+    end
+end
