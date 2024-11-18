@@ -28,6 +28,9 @@ Returns:
 - `NumberCountsTracer::NumberCountsTracer` : Number counts tracer structure.
 """
 NumberCountsTracer(cosmo::Cosmology, z, nz; b=1.0) = begin
+    sel = @. (z > 0.0)
+    z = z[sel]
+    nz = nz[sel]
     nz_norm = integrate(z, nz, SimpsonEven())  
     chi = cosmo.chi(z)
     hz = Hmpc(cosmo, z)
@@ -58,6 +61,9 @@ end
 
 WeakLensingTracer(cosmo::Cosmology, z, nz;
     IA_params = [0.0, 0.0], m=0.0) = begin
+    sel = @. (z > 0.0)
+    z = z[sel]
+    nz = nz[sel]
     cosmo_type = cosmo.settings.cosmo_type
     res = length(z)
     nz_norm = integrate(z, nz, SimpsonEven())
