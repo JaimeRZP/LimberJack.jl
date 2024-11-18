@@ -1,9 +1,7 @@
 function Theory(cosmology::Cosmology,
                 names, types, pairs,
                 idx, files;
-                Nuisances=Dict(),
-                res_wl=350, res_gc=1000,
-                int_wl="linear", int_gc="linear")
+                Nuisances=Dict())
     
     nui_type =  eltype(valtype(Nuisances))
     if !(nui_type <: Float64) & (nui_type != Any)
@@ -22,10 +20,7 @@ function Theory(cosmology::Cosmology,
             b = get(Nuisances, string(name, "_", "b"), 1.0)
             nz = get(Nuisances, string(name, "_", "nz"), nz_mean)
             zs = get(Nuisances, string(name, "_", "zs"), zs_mean)
-            dz = get(Nuisances, string(name, "_", "dz"), 0.0)
-            tracer = NumberCountsTracer(cosmology, zs .+ dz, nz;
-                                        b=b, res=res_gc, 
-                                        nz_interpolation=int_gc)
+            tracer = NumberCountsTracer(cosmology, zs, nz; b=b)
         elseif t_type == "galaxy_shear"
             zs_mean, nz_mean = files[string("nz_", name)]
             m = get(Nuisances, string(name, "_", "m"), 0.0)
@@ -33,11 +28,8 @@ function Theory(cosmology::Cosmology,
                          get(Nuisances, "alpha_IA", 0.0)]
             nz = get(Nuisances, string(name, "_", "nz"), nz_mean)
             zs = get(Nuisances, string(name, "_", "zs"), zs_mean)
-            dz = get(Nuisances, string(name, "_", "dz"), 0.0)
-            tracer = WeakLensingTracer(cosmology, zs .+ dz, nz;
-                                       m=m, IA_params=IA_params,
-                                       res=res_wl,
-                                       nz_interpolation=int_wl)
+            tracer = WeakLensingTracer(cosmology, zs, nz;
+                                       m=m, IA_params=IA_params)
             
         elseif t_type == "cmb_convergence"
             tracer = CMBLensingTracer(cosmology)

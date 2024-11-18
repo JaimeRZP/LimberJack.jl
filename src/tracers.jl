@@ -27,16 +27,11 @@ Kwargs:
 Returns:
 - `NumberCountsTracer::NumberCountsTracer` : Number counts tracer structure.
 """
-NumberCountsTracer(cosmo::Cosmology, z_n, nz; 
-    b=1.0, res=1000, nz_interpolation="linear", smooth=0) = begin
-    z_w, nz_w = nz_interpolate(z_n, nz, res;
-        mode=nz_interpolation)
-    nz_norm = integrate(z_w, nz_w, SimpsonEven())
-    
-    chi = cosmo.chi(z_w)
-    hz = Hmpc(cosmo, z_w)
-    
-    w_arr = @. (nz_w*hz/nz_norm)
+NumberCountsTracer(cosmo::Cosmology, z, nz; b=1.0) = begin
+    nz_norm = integrate(z, nz, SimpsonEven())  
+    chi = cosmo.chi(z)
+    hz = Hmpc(cosmo, z)
+    w_arr = @. (nz*hz/nz_norm)
     wint = linear_interpolation(chi, b .* w_arr, extrapolation_bc=0.0)
     F::Function = ℓ -> 1
     NumberCountsTracer(wint, F)
@@ -61,40 +56,29 @@ struct WeakLensingTracer <: Tracer
     F::Function
 end
 
-WeakLensingTracer(cosmo::Cosmology, z_n, nz;
-    IA_params = [0.0, 0.0], m=0.0,
-    res=350, nz_interpolation="linear") = begin
+WeakLensingTracer(cosmo::Cosmology, z, nz;
+    IA_params = [0.0, 0.0], m=0.0) = begin
     cosmo_type = cosmo.settings.cosmo_type
-    z_w, nz_w = nz_interpolate(z_n, nz, res;
-        mode=nz_interpolation)
-    res = length(z_w)
-    nz_norm = integrate(z_w, nz_w, SimpsonEven())
-    chi = cosmo.chi(z_w)
-
-    # Calculate chis at which to precalculate the lensing kernel
-    # OPT: perhaps we don't need to sample the lensing kernel
-    #      at all zs.
-    # Calculate integral at each chi
-    w_itg(chii) = @.(nz_w*(1-chii/chi))
+    res = length(z)
+    nz_norm = integrate(z, nz, SimpsonEven())
+    chi = cosmo.chi(z)
+    # Compute kernels
+    w_itg(chii) = @.(nz*(1-chii/chi))
     w_arr = zeros(cosmo_type, res)
     @inbounds for i in 1:res-3
-        w_arr[i] = integrate(z_w[i:res], w_itg(chi[i])[i:res], SimpsonEven())
+        w_arr[i] = integrate(z[i:res], w_itg(chi[i])[i:res], SimpsonEven())
     end
-    
     # Normalize
     H0 = cosmo.cpar.h/CLIGHT_HMPC
     lens_prefac = 1.5*cosmo.cpar.Ωm*H0^2
-    # Fix first element
     chi[1] = 0.0
-    w_arr = @. w_arr * chi * lens_prefac * (1+z_w) / nz_norm
-    
+    w_arr = @. w_arr * chi * lens_prefac * (1+z) / nz_norm
     if IA_params != [0.0, 0.0]
-        hz = Hmpc(cosmo, z_w)
-        As = get_IA(cosmo, z_w, IA_params)
-        corr =  @. As * (nz_w * hz / nz_norm)
+        hz = Hmpc(cosmo, z)
+        As = get_IA(cosmo, z, IA_params)
+        corr =  @. As * (nz * hz / nz_norm)
         w_arr = @. w_arr - corr
     end
-
     # Interpolate
     b = m+1.0
     wint = linear_interpolation(chi, b.*w_arr, extrapolation_bc=0.0)
@@ -127,13 +111,12 @@ Returns:
 CMBLensingTracer(cosmo::Cosmology; res=350) = begin
     # chi array
     chis = range(0.0, stop=cosmo.chi_max, length=res)
-    zs = cosmo.z_of_chi(chis)
+    z = cosmo.z_of_chi(chis)
     # Prefactor
     H0 = cosmo.cpar.h/CLIGHT_HMPC
     lens_prefac = 1.5*cosmo.cpar.Ωm*H0^2
     # Kernel
-    w_arr = @. lens_prefac*chis*(1-chis/cosmo.chi_LSS)*(1+zs)
-
+    w_arr = @. lens_prefac*chis*(1-chis/cosmo.chi_LSS)*(1+z)
     # Interpolate
     wint = linear_interpolation(chis, w_arr, extrapolation_bc=0.0)
     F::Function = ℓ -> @.(((ℓ+1)*ℓ)/(ℓ+0.5)^2) 
@@ -156,22 +139,3 @@ function get_IA(cosmo::Cosmology, zs, IA_params)
     return @. A_IA*((1 + zs)/1.62)^alpha_IA * (0.0134 * cosmo.cpar.Ωm / cosmo.Dz(zs))
 end
 
-function nz_interpolate(z, nz, res; mode="linear")
-    if mode!="none"
-        if mode=="linear"
-            nz_int = linear_interpolation(z, nz;
-                extrapolation_bc=0.0)
-        end
-        if mode=="cubic"
-            dz = mean(z[2:end] - z[1:end-1])
-            z_range = z[1]:dz:z[end]
-            nz_int = cubic_spline_interpolation(z_range, nz;
-                extrapolation_bc=0.0)
-        end
-        zz_range = range(0.00001, stop=z[end], length=res)
-        nzz = nz_int(zz_range)
-        return zz_range, nzz
-    else
-        return z, nz
-    end
-end
