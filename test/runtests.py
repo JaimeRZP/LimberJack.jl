@@ -57,25 +57,23 @@ test_results["pk_emul_nonlin_z1"] = ccl.nonlin_matter_power(cosmo_camb_nonlin, k
 test_results["pk_emul_nonlin_z2"] = ccl.nonlin_matter_power(cosmo_camb_nonlin, ks, 0.333333)
 test_results["pk_Bolt_nonlin"] = ccl.nonlin_matter_power(cosmo_bolt_nonlin, ks, 1.)
 # =====
-z = np.linspace(0., 2., num=1000)
+z = np.linspace(0.01, 2., num=1000)
 nz = np.exp(-0.5*((z-0.5)/0.05)**2)
-clustering_chis, clustering_warr = ccl.tracers.get_density_kernel(cosmo_eishu,(z,nz))
+clustering_chis, clustering_warr = ccl.tracers.get_density_kernel(cosmo_eishu, dndz=(z,nz))
 test_results["clustering_chis"] = clustering_chis
 test_results["clustering_warr"] = clustering_warr
-lensing_chis, lensing_warr = ccl.tracers.get_lensing_kernel(cosmo_eishu, (z,nz))
+lensing_chis, lensing_warr = ccl.tracers.get_lensing_kernel(cosmo_eishu, dndz=(z,nz))
 test_results["lensing_chis"] = lensing_chis
 test_results["lensing_warr"] = lensing_warr
-CMBLensing_chis, CMBLensing_warr = ccl.tracers.get_kappa_kernel(cosmo_eishu, 1100, 100)
+CMBLensing_chis, CMBLensing_warr = ccl.tracers.get_kappa_kernel(cosmo_eishu, z_source=1100, n_samples=100)
 test_results["CMBLensing_chis"] = CMBLensing_chis
 test_results["CMBLensing_warr"] = CMBLensing_warr
 # =====
-z = np.linspace(0., 2., num=1000)
-nz = np.exp(-0.5*((z-0.5)/0.05)**2)
 if extensive:
     ℓs = np.logspace(1,3,100)
 else:
     ℓs = np.array([10.0, 30.0, 100.0, 300.0, 1000.0])
-tg = ccl.NumberCountsTracer(cosmo_eishu, False, dndz=(z, nz), bias=(z, 1 * np.ones_like(z)))
+tg = ccl.NumberCountsTracer(cosmo_eishu, has_rsd=False, dndz=(z, nz), bias=(z, 1 * np.ones_like(z)))
 ts = ccl.WeakLensingTracer(cosmo_eishu, dndz=(z, nz))
 tk = ccl.CMBLensingTracer(cosmo_eishu, z_source=1100)
 test_results["cl_gg_eishu"] = ccl.angular_cl(cosmo_eishu, tg, tg, ℓs)
@@ -85,13 +83,11 @@ test_results["cl_gk_eishu"] = ccl.angular_cl(cosmo_eishu, tg, tk, ℓs)
 test_results["cl_sk_eishu"] = ccl.angular_cl(cosmo_eishu, ts, tk, ℓs)
 test_results["cl_kk_eishu"] = ccl.angular_cl(cosmo_eishu, tk, tk, ℓs)
 # =====
-z = np.linspace(0., 2., num=1000)
-nz = np.exp(-0.5*((z-0.5)/0.05)**2)
 if extensive:
     ℓs = np.logspace(1,3,100)
 else:
     ℓs = np.array([10.0, 30.0, 100.0, 300.0, 1000.0])
-tg = ccl.NumberCountsTracer(cosmo_eishu_nonlin, False, dndz=(z, nz), bias=(z, 1 * np.ones_like(z)))
+tg = ccl.NumberCountsTracer(cosmo_eishu_nonlin, has_rsd=False, dndz=(z, nz), bias=(z, 1 * np.ones_like(z)))
 ts = ccl.WeakLensingTracer(cosmo_eishu_nonlin, dndz=(z, nz))
 tk = ccl.CMBLensingTracer(cosmo_eishu_nonlin, z_source=1100)
 test_results["cl_gg_eishu_nonlin"] = ccl.angular_cl(cosmo_eishu_nonlin, tg, tg, ℓs)
@@ -101,13 +97,11 @@ test_results["cl_gk_eishu_nonlin"] = ccl.angular_cl(cosmo_eishu_nonlin, tg, tk, 
 test_results["cl_sk_eishu_nonlin"] = ccl.angular_cl(cosmo_eishu_nonlin, ts, tk, ℓs)
 test_results["cl_kk_eishu_nonlin"] = ccl.angular_cl(cosmo_eishu_nonlin, tk, tk, ℓs)
 # =====
-z = np.linspace(0., 2., num=1000)
-nz = np.exp(-0.5*((z-0.5)/0.05)**2)
 if extensive:
     ℓs = np.logspace(1,3,100)
 else:
     ℓs = np.array([10.0, 30.0, 100.0, 300.0, 1000.0])
-tg = ccl.NumberCountsTracer(cosmo_camb, False, dndz=(z, nz), bias=(z, 1 * np.ones_like(z)))
+tg = ccl.NumberCountsTracer(cosmo_camb, has_rsd=False, dndz=(z, nz), bias=(z, 1 * np.ones_like(z)))
 ts = ccl.WeakLensingTracer(cosmo_camb, dndz=(z, nz))
 tk = ccl.CMBLensingTracer(cosmo_camb, z_source=1100)
 test_results["cl_gg_camb"] = ccl.angular_cl(cosmo_camb, tg, tg, ℓs)
@@ -117,13 +111,11 @@ test_results["cl_gk_camb"] = ccl.angular_cl(cosmo_camb, tg, tk, ℓs)
 test_results["cl_sk_camb"] = ccl.angular_cl(cosmo_camb, ts, tk, ℓs)
 test_results["cl_kk_camb"] = ccl.angular_cl(cosmo_camb, tk, tk, ℓs)
 # =====
-z = np.linspace(0., 2., num=1000)
-nz = np.exp(-0.5*((z-0.5)/0.05)**2)
 if extensive:
     ℓs = np.logspace(1,3,100)
 else:
     ℓs = np.array([10.0, 30.0, 100.0, 300.0, 1000.0])
-tg = ccl.NumberCountsTracer(cosmo_eishu_nonlin, False, dndz=(z, nz), bias=(z, 1 * np.ones_like(z)))
+tg = ccl.NumberCountsTracer(cosmo_eishu_nonlin, has_rsd=False, dndz=(z, nz), bias=(z, 1 * np.ones_like(z)))
 ts = ccl.WeakLensingTracer(cosmo_eishu_nonlin, dndz=(z, nz))
 tk = ccl.CMBLensingTracer(cosmo_eishu_nonlin, z_source=1100)
 test_results["cl_gg_eishu_nonlin"] = ccl.angular_cl(cosmo_eishu_nonlin, tg, tg, ℓs)
@@ -133,13 +125,11 @@ test_results["cl_gk_eishu_nonlin"] = ccl.angular_cl(cosmo_eishu_nonlin, tg, tk, 
 test_results["cl_sk_eishu_nonlin"] = ccl.angular_cl(cosmo_eishu_nonlin, ts, tk, ℓs)
 test_results["cl_kk_eishu_nonlin"] = ccl.angular_cl(cosmo_eishu_nonlin, tk, tk, ℓs)
 # =====
-z = np.linspace(0.01, 2., num=1024)
-nz = np.exp(-0.5*((z-0.5)/0.05)**2)
 if extensive:
     ℓs = np.logspace(1,3,100)
 else:
     ℓs = np.array([10.0, 30.0, 100.0, 300.0, 1000.0])
-tg = ccl.NumberCountsTracer(cosmo_camb_nonlin, False, dndz=(z, nz), bias=(z, 1 * np.ones_like(z)))
+tg = ccl.NumberCountsTracer(cosmo_camb_nonlin, has_rsd=False, dndz=(z, nz), bias=(z, 1 * np.ones_like(z)))
 ts = ccl.WeakLensingTracer(cosmo_camb_nonlin, dndz=(z, nz))
 tk = ccl.CMBLensingTracer(cosmo_camb_nonlin, z_source=1100)
 test_results["cl_gg_camb_nonlin"] = ccl.angular_cl(cosmo_camb_nonlin, tg, tg, ℓs)
@@ -149,15 +139,13 @@ test_results["cl_gk_camb_nonlin"] = ccl.angular_cl(cosmo_camb_nonlin, tg, tk, �
 test_results["cl_sk_camb_nonlin"] = ccl.angular_cl(cosmo_camb_nonlin, ts, tk, ℓs)
 test_results["cl_kk_camb_nonlin"] = ccl.angular_cl(cosmo_camb_nonlin, tk, tk, ℓs)
 # =====
-z = np.linspace(0.01, 2., num=256)
-nz = np.exp(-0.5*((z-0.5)/0.05)**2)
 if extensive:
     ℓs = np.logspace(1,3,100)
 else:
     ℓs = np.array([10.0, 30.0, 100.0, 300.0, 1000.0])
 Dz = ccl.comoving_radial_distance(cosmo_eishu,  1 / (1 + z))
 IA_corr = (0.1*((1 + z)/1.62)**0.1 * (0.0134*0.3/Dz))
-tg_b = ccl.NumberCountsTracer(cosmo_eishu_nonlin, False, dndz=(z, nz), bias=(z, 2 * np.ones_like(z)))
+tg_b = ccl.NumberCountsTracer(cosmo_eishu_nonlin, has_rsd=False, dndz=(z, nz), bias=(z, 2 * np.ones_like(z)))
 ts_m = ccl.WeakLensingTracer(cosmo_eishu_nonlin, dndz=(z, nz))
 ts_IA = ccl.WeakLensingTracer(cosmo_eishu_nonlin, dndz=(z, nz), ia_bias=(z, IA_corr))
 test_results["cl_gg_b"] = ccl.angular_cl(cosmo_eishu_nonlin, tg_b, tg_b, ℓs)
