@@ -181,9 +181,7 @@ if test_main
             z = Vector(range(0.01, stop=2., length=1000))
             nz = @. exp(-0.5*((z-0.5)/0.05)^2)
             tg = NumberCountsTracer(cosmo_EisHu, z, nz; b=1.0)
-            ts = WeakLensingTracer(cosmo_EisHu, z, nz;
-                                m=0.0,
-                                IA_params=[0.0, 0.0])
+            ts = WeakLensingTracer(cosmo_EisHu, z, nz)
             tk = CMBLensingTracer(cosmo_EisHu)
             Cℓ_gg = angularCℓs(cosmo_EisHu, tg, tg, ℓs)
             Cℓ_gs = angularCℓs(cosmo_EisHu, tg, ts, ℓs)
@@ -223,9 +221,7 @@ if test_main
             z = Vector(range(0.01, stop=2., length=1000))
             nz = @. exp(-0.5*((z-0.5)/0.05)^2)
             tg = NumberCountsTracer(cosmo_EisHu, z, nz; b=1.0)
-            ts = WeakLensingTracer(cosmo_EisHu, z, nz;
-                                m=0.0,
-                                IA_params=[0.0, 0.0])
+            ts = WeakLensingTracer(cosmo_EisHu, z, nz)
             tk = CMBLensingTracer(cosmo_EisHu)
             Cℓ_gg = angularCℓs(cosmo_EisHu_nonlin, tg, tg, ℓs)
             Cℓ_gs = angularCℓs(cosmo_EisHu_nonlin, tg, ts, ℓs)
@@ -265,9 +261,7 @@ if test_main
             z = Vector(range(0.01, stop=2., length=1000))
             nz = @. exp(-0.5*((z-0.5)/0.05)^2)
             tg = NumberCountsTracer(cosmo_emul, z, nz; b=1.0)
-            ts = WeakLensingTracer(cosmo_emul, z, nz;
-                                m=0.0,
-                                IA_params=[0.0, 0.0])
+            ts = WeakLensingTracer(cosmo_emul, z, nz)
             tk = CMBLensingTracer(cosmo_emul)
             Cℓ_gg = angularCℓs(cosmo_emul, tg, tg, ℓs) 
             Cℓ_gs = angularCℓs(cosmo_emul, tg, ts, ℓs)
@@ -306,9 +300,7 @@ if test_main
             z = Vector(range(0.01, stop=2., length=1000))
             nz = @. exp(-0.5*((z-0.5)/0.05)^2)
             tg = NumberCountsTracer(cosmo_EisHu_nonlin, z, nz; b=1.0)
-            ts = WeakLensingTracer(cosmo_EisHu_nonlin, z, nz;
-                                m=0.0,
-                                IA_params=[0.0, 0.0])
+            ts = WeakLensingTracer(cosmo_EisHu_nonlin, z, nz)
             tk = CMBLensingTracer(cosmo_EisHu_nonlin)
             Cℓ_gg = angularCℓs(cosmo_EisHu_nonlin, tg, tg, ℓs)
             Cℓ_gs = angularCℓs(cosmo_EisHu_nonlin, tg, ts, ℓs) 
@@ -348,9 +340,7 @@ if test_main
             z = Vector(range(0.01, stop=2., length=1000))
             nz = @. exp(-0.5*((z-0.5)/0.05)^2)
             tg = NumberCountsTracer(cosmo_emul_nonlin, z, nz; b=1.0)
-            ts = WeakLensingTracer(cosmo_emul_nonlin, z, nz;
-                                m=0.0,
-                                IA_params=[0.0, 0.0])
+            ts = WeakLensingTracer(cosmo_emul_nonlin, z, nz)
             tk = CMBLensingTracer(cosmo_emul_nonlin)
             Cℓ_gg = angularCℓs(cosmo_emul_nonlin, tg, tg, ℓs)
             Cℓ_gs = angularCℓs(cosmo_emul_nonlin, tg, ts, ℓs) 
@@ -572,9 +562,7 @@ if test_main
                 z = Vector(range(0.01, stop=2., length=1000))
                 nz = Vector(@. exp(-0.5*((z-0.5)/0.05)^2))
                 tg = NumberCountsTracer(cosmo, z, nz; b=1.0)
-                ts = WeakLensingTracer(cosmo, z, nz;
-                                    m=0.0,
-                                    IA_params=[0.0, 0.0])
+                ts = WeakLensingTracer(cosmo, z, nz)
                 Cℓ_gs = angularCℓs(cosmo, tg, ts, ℓs) 
                 return Cℓ_gs
             end
@@ -584,9 +572,7 @@ if test_main
                     nz=700, nz_t=700, nz_pk=700)
                 z = Vector(range(0.01, stop=2., length=1000))
                 nz = Vector(@. exp(-0.5*((z-0.5)/0.05)^2))
-                ts = WeakLensingTracer(cosmo, z, nz;
-                                    m=0.0,
-                                    IA_params=[0.0, 0.0])
+                ts = WeakLensingTracer(cosmo, z, nz)
                 Cℓ_ss = angularCℓs(cosmo, ts, ts, ℓs)
                 return Cℓ_ss
             end
@@ -596,9 +582,7 @@ if test_main
                     nz=500, nz_t=500, nz_pk=700)
                 z = range(0.01, stop=2., length=2000)
                 nz = @. exp(-0.5*((z-0.5)/0.05)^2)
-                ts = WeakLensingTracer(cosmo, z, nz;
-                                    m=0.0,
-                                    IA_params=[0.0, 0.0])
+                ts = WeakLensingTracer(cosmo, z, nz)
                 tk = CMBLensingTracer(cosmo)
                 Cℓ_sk = angularCℓs(cosmo, ts, tk, ℓs)
                 return Cℓ_sk
@@ -671,8 +655,9 @@ if test_main
             z = Vector(range(0.01, stop=2., length=1024))
             nz = @. exp(-0.5*((z-0.5)/0.05)^2)
             tg_b = NumberCountsTracer(cosmo_EisHu_nonlin, z, nz; b=2.0)
-            ts_m = WeakLensingTracer(cosmo_EisHu_nonlin, z, nz; m=1.0, IA_params=[0.0, 0.0])
-            ts_IA = WeakLensingTracer(cosmo_EisHu_nonlin, z, nz; m=0.0, IA_params=[0.1, 0.1])
+            ts_m = WeakLensingTracer(cosmo_EisHu_nonlin, z, nz; m=1.0)
+            ts_IA = WeakLensingTracer(cosmo_EisHu_nonlin, z, nz; 
+                m=0.0, A_IA=0.1, alpha_IA=0.1)
             Cℓ_gg_b = angularCℓs(cosmo_EisHu_nonlin, tg_b, tg_b, ℓs)
             Cℓ_ss_m = angularCℓs(cosmo_EisHu_nonlin, ts_m, ts_m, ℓs)
             Cℓ_ss_IA = angularCℓs(cosmo_EisHu_nonlin, ts_IA, ts_IA, ℓs)
@@ -707,7 +692,7 @@ if test_main
                 cosmo.settings.cosmo_type = typeof(p)
                 z = Vector(range(0.01, stop=2., length=2000)) .- p
                 nz = Vector(@. exp(-0.5*((z-0.5)/0.05)^2))
-                ts = WeakLensingTracer(cosmo, z, nz; m=p, IA_params=[0.0, 0.0])
+                ts = WeakLensingTracer(cosmo, z, nz; m=p)
                 ℓs = [10.0, 30.0, 100.0, 300.0]
                 Cℓ_ss = angularCℓs(cosmo, ts, ts, ℓs) 
                 return Cℓ_ss
@@ -718,7 +703,7 @@ if test_main
                 cosmo.settings.cosmo_type = typeof(p)
                 z = range(0.01, stop=2., length=2000)
                 nz = @. exp(-0.5*((z-0.5)/0.05)^2)
-                ts = WeakLensingTracer(cosmo, z, nz; m=p, IA_params=[0.0, 0.0])
+                ts = WeakLensingTracer(cosmo, z, nz; m=p)
                 ℓs = [10.0, 30.0, 100.0, 300.0]
                 Cℓ_sk = angularCℓs(cosmo, ts, ts, ℓs)
                 return Cℓ_sk
@@ -729,7 +714,7 @@ if test_main
                 cosmo.settings.cosmo_type = typeof(p)
                 z = range(0.01, stop=2., length=2000)
                 nz = @. exp(-0.5*((z-0.5)/0.05)^2)
-                ts = WeakLensingTracer(cosmo, z, nz; m=2, IA_params=[p, 0.1])
+                ts = WeakLensingTracer(cosmo, z, nz; m=2, A_IA=p, alpha_IA=0.1)
                 ℓs = [10.0, 30.0, 100.0, 300.0]
                 Cℓ_ss = angularCℓs(cosmo, ts, ts, ℓs)
                 return Cℓ_ss
@@ -740,7 +725,7 @@ if test_main
                 cosmo.settings.cosmo_type = typeof(p)
                 z = range(0.01, stop=2., length=2000)
                 nz = @. exp(-0.5*((z-0.5)/0.05)^2)
-                ts = WeakLensingTracer(cosmo, z, nz; m=2, IA_params=[0.3, p])
+                ts = WeakLensingTracer(cosmo, z, nz; m=2, A_IA=0.3, alpha_IA=p)
                 ℓs = [10.0, 30.0, 100.0, 300.0]
                 Cℓ_ss = angularCℓs(cosmo, ts, ts, ℓs)
                 return Cℓ_ss

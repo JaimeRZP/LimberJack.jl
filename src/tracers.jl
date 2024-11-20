@@ -60,7 +60,7 @@ struct WeakLensingTracer <: Tracer
 end
 
 WeakLensingTracer(cosmo::Cosmology, z, nz;
-    IA_params = [0.0, 0.0], m=0.0) = begin
+    A_IA=0.0, alpha_IA=0.0, m=0.0) = begin
     sel = @. (z > 0.0)
     z = z[sel]
     nz = nz[sel]
@@ -79,15 +79,14 @@ WeakLensingTracer(cosmo::Cosmology, z, nz;
     lens_prefac = 1.5*cosmo.cpar.Ωm*H0^2
     chi[1] = 0.0
     w_arr = @. w_arr * chi * lens_prefac * (1+z) / nz_norm
-    if IA_params != [0.0, 0.0]
-        hz = Hmpc(cosmo, z)
-        As = get_IA(cosmo, z, IA_params)
-        corr =  @. As * (nz * hz / nz_norm)
-        w_arr = @. w_arr - corr
-    end
+    # IA correction
+    hz = Hmpc(cosmo, z)
+    As = @. A_IA*((1 + z)/1.62)^alpha_IA * (0.0134 * cosmo.cpar.Ωm / cosmo.Dz(z))
+    corr =  @. As * (nz * hz / nz_norm)
+    w_arr_ia = @. w_arr - corr
     # Interpolate
     b = m+1.0
-    wint = linear_interpolation(chi, b.*w_arr, extrapolation_bc=0.0)
+    wint = linear_interpolation(chi, b.*w_arr_ia, extrapolation_bc=0.0)
     F::Function = ℓ -> @.(sqrt((ℓ+2)*(ℓ+1)*ℓ*(ℓ-1))/(ℓ+0.5)^2)
     WeakLensingTracer(wint, F)
 end

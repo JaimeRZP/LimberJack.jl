@@ -24,12 +24,14 @@ function Theory(cosmology::Cosmology,
         elseif t_type == "galaxy_shear"
             zs_mean, nz_mean = files[string("nz_", name)]
             m = get(Nuisances, string(name, "_", "m"), 0.0)
-            IA_params = [get(Nuisances, "A_IA", 0.0),
-                         get(Nuisances, "alpha_IA", 0.0)]
+            A_IA = get(Nuisances, "A_IA", 0.0)
+            alpha_IA = get(Nuisances, "alpha_IA", 0.0)
             nz = get(Nuisances, string(name, "_", "nz"), nz_mean)
             zs = get(Nuisances, string(name, "_", "zs"), zs_mean)
             tracer = WeakLensingTracer(cosmology, zs, nz;
-                                       m=m, IA_params=IA_params)
+                                       m=m, 
+                                       A_IA=A_IA,
+                                       alpha_IA=alpha_IA)
             
         elseif t_type == "cmb_convergence"
             tracer = CMBLensingTracer(cosmology)
