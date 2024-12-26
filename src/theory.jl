@@ -46,7 +46,7 @@ function Theory(cosmology::Cosmology,
     npairs = length(pairs)
     total_len = last(idx)
     cls = zeros(cosmology.settings.cosmo_type, total_len)
-    @inbounds Threads.@threads :static for i in 1:npairs
+    @inbounds for i in 1:npairs
         name1, name2 = pairs[i]
         ls = files[string("ls_", name1, "_", name2)]
         tracer1 = tracers[name1]
