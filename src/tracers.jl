@@ -70,7 +70,8 @@ WeakLensingTracer(cosmo::Cosmology, z, nz;
     chi = cosmo.chi(z)
     # Compute kernels
     w_itg(chii) = @.(nz*(1-chii/chi))
-    w_arr = zeros(cosmo_type, res)
+    w_type = typeof(integrate(z[2:res], w_itg(chi[2])[2:res], SimpsonEven()))
+    w_arr = zeros(w_type, res)
     @inbounds for i in 1:res-3
         w_arr[i] = integrate(z[i:res], w_itg(chi[i])[i:res], SimpsonEven())
     end
@@ -81,7 +82,7 @@ WeakLensingTracer(cosmo::Cosmology, z, nz;
     w_arr = @. w_arr * chi * lens_prefac * (1+z) / nz_norm
     # IA correction
     hz = Hmpc(cosmo, z)
-    As = @. A_IA*((1 + z)/1.62)^alpha_IA * (0.0134 * cosmo.cpar.Ωm / cosmo.Dz(z))
+    As = get_IA(cosmo, z, A_IA, alpha_IA)
     corr =  @. As * (nz * hz / nz_norm)
     w_arr_ia = @. w_arr - corr
     # Interpolate
@@ -89,6 +90,21 @@ WeakLensingTracer(cosmo::Cosmology, z, nz;
     wint = linear_interpolation(chi, b.*w_arr_ia, extrapolation_bc=0.0)
     F::Function = ℓ -> @.(sqrt((ℓ+2)*(ℓ+1)*ℓ*(ℓ-1))/(ℓ+0.5)^2)
     WeakLensingTracer(wint, F)
+end
+
+"""
+    get_IA(cosmo::Cosmology, zs, IA_params)
+CMB lensing tracer structure. 
+Arguments:
+- `cosmo::Cosmology` : cosmology structure.
+- `zs::Vector{Dual}` : redshift array.
+- `A_IA::Dual` : Intrinsic aligment amplitud.
+- `alpha_IA::Dual` : Intrinsic aligment slope.
+Returns:
+- `IA_corr::Vector{Dual}` : Intrinsic aligment correction to radial kernel.
+"""
+function get_IA(cosmo::Cosmology, zs, A_IA, alpha_IA)
+    return @. A_IA*((1 + zs)/1.62)^alpha_IA * (0.0134 * cosmo.cpar.Ωm / cosmo.Dz(zs))
 end
 
 """
@@ -126,22 +142,6 @@ CMBLensingTracer(cosmo::Cosmology; res=350) = begin
     wint = linear_interpolation(chis, w_arr, extrapolation_bc=0.0)
     F::Function = ℓ -> @.(((ℓ+1)*ℓ)/(ℓ+0.5)^2) 
     CMBLensingTracer(wint, F)
-end
-
-"""
-    get_IA(cosmo::Cosmology, zs, IA_params)
-CMB lensing tracer structure. 
-Arguments:
-- `cosmo::Cosmology` : cosmology structure.
-- `zs::Vector{Dual}` : redshift array.
-- `IA_params::Vector{Dual}` : Intrinsic aligment parameters.
-Returns:
-- `IA_corr::Vector{Dual}` : Intrinsic aligment correction to radial kernel.
-"""
-function get_IA(cosmo::Cosmology, zs, IA_params)
-    A_IA = IA_params[1]
-    alpha_IA = IA_params[2]
-    return @. A_IA*((1 + zs)/1.62)^alpha_IA * (0.0134 * cosmo.cpar.Ωm / cosmo.Dz(zs))
 end
 
 function nz_interpolate(z, nz, res; mode="linear")
