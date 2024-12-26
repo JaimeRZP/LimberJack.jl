@@ -70,7 +70,8 @@ WeakLensingTracer(cosmo::Cosmology, z, nz;
     chi = cosmo.chi(z)
     # Compute kernels
     w_itg(chii) = @.(nz*(1-chii/chi))
-    w_arr = zeros(cosmo_type, res)
+    w_type = typeof(integrate(z[2:res], w_itg(chi[2])[2:res], SimpsonEven()))
+    w_arr = zeros(w_type, res)
     @inbounds for i in 1:res-3
         w_arr[i] = integrate(z[i:res], w_itg(chi[i])[i:res], SimpsonEven())
     end
