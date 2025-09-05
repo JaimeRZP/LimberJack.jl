@@ -10,7 +10,7 @@ export Theory
 export make_data
 
 using Interpolations, LinearAlgebra, Statistics, QuadGK
-using NPZ, NumericalIntegration, Artifacts 
+using NPZ, NumericalIntegration, PythonCall, Artifacts 
 include("core.jl")
 include("boltzmann.jl")
 include("data_utils.jl")
