@@ -111,7 +111,7 @@ function make_data(sacc_file, yaml_file; kwargs...)
     # Load in l's
     for (pair, l) in zip(pairs, ls)
         t1, t2 = pair
-        println(t1, " ", t2, " ", length(l))
+        #println(t1, " ", t2, " ", length(l))
         merge!(files, Dict(string("ls_", t1, "_", t2)=> l))
     end
     
@@ -119,7 +119,7 @@ function make_data(sacc_file, yaml_file; kwargs...)
     for (name, tracer) in sacc_file.tracers.items()
         if string(name) in names
             if string("nz_", name) in kwargs_keys
-                println(string("using custom nz for ", string("nz_", name)))
+                #println(string("using custom nz for ", string("nz_", name)))
                 nzs = kwargs[Symbol("nz_", name)]
                 z= pyconvert(Vector{Float64}, nzs["z"])
                 nz=pyconvert(Vector{Float64}, nzs["dndz"])
